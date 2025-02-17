@@ -120,8 +120,8 @@ class Plot:
 
         return idx
 
-    def PlotTsContour(self, z, title, cbar_label, contour_bounds=np.array([0, 0]),
-                      levels=50, powerNorm=False, powerNormCoeff=0.4):
+    def PlotTsContour(self, z, title, cbar_label, Z = None, FundDerGamma=None, nIsoLinesGamma=10, contour_bounds=np.array([0, 0]),
+                      levels=50, powerNorm=False,  isolines=False, powerNormCoeff=0.4):
         """ Create contour plot of the thermodynamic quantity z in the reduced T-s plane """
         fig, ax = plt.subplots()
 
@@ -134,9 +134,9 @@ class Plot:
             markers = ['s', 'o', '^', 'D', 'P', 'X', '*']
             for ii in range(len(self.x_in)):
                 ax.plot(self.x_in[ii] / self.xc, self.y_in[ii] / self.yc,
-                        marker=markers[ii], ms=10, color='black', label=self.labels[ii])
+                        marker=markers[ii], ms=8, color='grey', label=self.labels[ii])
                 ax.plot([self.x_in[ii] / self.xc, self.x_out[ii] / self.xc],
-                        [self.y_in[ii] / self.yc, self.y_out[ii] / self.yc], color='black')
+                        [self.y_in[ii] / self.yc, self.y_out[ii] / self.yc], color='grey')
 
         # plot saturation curve, critical isobar, and Widom line
         ax.plot(self.x_sat / self.xc, self.y_sat / self.yc, color='black')
@@ -159,6 +159,22 @@ class Plot:
                 CS = ax.contourf(self.x / self.xc, self.y / self.yc, z,
                                  np.linspace(contour_bounds[0], contour_bounds[1], levels),
                                  cmap=self.cmap, origin='upper')
+                
+        # plot Z and FundDerGamma isolines
+        if isolines:
+            # Z
+            ZLevels =  [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
+            Z_contour = ax.contour(self.x / self.xc, self.y / self.yc, Z, levels=ZLevels, colors='yellow', alpha=1)
+            ax.clabel(Z_contour, fontsize = 14, fmt = '%.2f')
+            # FundDerGamma
+            GammaLevels = np.nanpercentile(FundDerGamma,np.linspace(1,95,nIsoLinesGamma))
+            FundDerGamma_contour = ax.contour(self.x / self.xc, self.y / self.yc, FundDerGamma,  levels=GammaLevels, colors='black', alpha=1, linestyles='--')
+            ax.clabel(FundDerGamma_contour, fontsize = 14, fmt = '%.2f')
+            # Create legend
+            legend_line_Z = mpl.lines.Line2D([0], [0], color='yellow', lw=2)
+            legend_line_FDGamma = mpl.lines.Line2D([0], [0], color='black', linestyle='--', lw=2)
+            legend1 = ax.legend([legend_line_Z, legend_line_FDGamma], ['Z', '$\Gamma$'], loc="lower left")
+            ax.add_artist(legend1)
 
         # plot settings
         cbar = fig.colorbar(CS, shrink=1.0, format='%.2f')
@@ -181,7 +197,8 @@ class Plot:
 
         return
 
-    def PlotPTContour(self, z, title, cbar_label, levels=50, powerNorm=False, powerNormCoeff=0.4):
+    def PlotPTContour(self, z, title, cbar_label, Z = None, FundDerGamma=None, levels=50, nIsoLinesGamma=6,  
+                      powerNorm=False, isolines=False, powerNormCoeff=0.4):
         """ Create contour plot of the thermodynamic quantity z in the reduced P-T plane """
         fig, ax = plt.subplots()
 
@@ -195,8 +212,8 @@ class Plot:
             markers = ['s', 'o', '^', 'D', 'P', 'X', '*']
             for ii in range(len(self.x_in)):
                 ax.plot(self.x_in[ii] / self.xc, self.y_in[ii] / self.yc,
-                        marker=markers[ii], ms=10, color='black', label=self.labels[ii])
-                ax.plot(self.x_iso[ii, :] / self.xc, self.y_iso[ii, :] / self.yc, color='black')
+                        marker=markers[ii], ms=10, color='grey', label=self.labels[ii])
+                ax.plot(self.x_iso[ii, :] / self.xc, self.y_iso[ii, :] / self.yc, color='grey')
 
         # create contour plot of the selected thermodynamic quantity z
         if powerNorm:
@@ -204,6 +221,22 @@ class Plot:
                              cmap=self.cmap, origin='upper', norm=mpl.colors.PowerNorm(gamma=powerNormCoeff))
         else:
             CS = ax.contourf(self.x / self.xc, self.y / self.yc, z, levels, cmap=self.cmap, origin='upper')
+
+        # plot Z and FundDerGamma isolines
+        if isolines:
+            # Z
+            ZLevels =  [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
+            Z_contour = ax.contour(self.x / self.xc, self.y / self.yc, Z, levels=ZLevels, colors='black', alpha=1)
+            ax.clabel(Z_contour, fontsize = 14, fmt = '%.2f')
+            # FundDerGamma
+            GammaLevels = np.nanpercentile(FundDerGamma,np.linspace(1,100,nIsoLinesGamma))
+            FundDerGamma_contour = ax.contour(self.x / self.xc, self.y / self.yc, FundDerGamma,  levels=GammaLevels, colors='black', alpha=1, linestyles='--')
+            ax.clabel(FundDerGamma_contour, fontsize = 14, fmt = '%.2f')
+            # Create legend
+            legend_line_Z = mpl.lines.Line2D([0], [0], color='black', lw=2)
+            legend_line_FDGamma = mpl.lines.Line2D([0], [0], color='black', linestyle='--', lw=2)
+            legend1 = ax.legend([legend_line_Z, legend_line_FDGamma], ['Z', '$\Gamma$'], loc="center left")
+            ax.add_artist(legend1)
 
         # plot settings
         cbar = fig.colorbar(CS, shrink=1.0, format='%.2f')
@@ -226,7 +259,7 @@ class Plot:
 
         return
 
-    def PlotExpansion(self, Pt_in, Dt_in, P_vec, D_vec, Z_vec, gamma_Pv_vec, M_vec):
+    def PlotExpansion(self, Pt_in, Dt_in, P_vec, D_vec, Z_vec, gamma_Pv_vec, M_vec, FundDerGamma, c_vec):
         """ Plot trend of gamma Pv, Mach, Z along the isentropic expansion """
 
         # iterate over inlet states
@@ -278,6 +311,64 @@ class Plot:
 
             plt.close(fig1)
             plt.close(fig2)
+
+        # Plot multi-line plots (all expansions in one plot)
+        fig1, ax1 = plt.subplots()  # Mach trend vs beta
+        fig2, ax2 = plt.subplots()  # FundementalDerivative trend vs beta
+        fig3, ax3 = plt.subplots()  # Rho trend vs Mach
+        fig4, ax4 = plt.subplots()  # c vs beta
+        for ii in range(len(self.labels)):
+            ax1.plot(Pt_in[ii] / P_vec[ii, :], M_vec[ii, :], lw=2, label=self.labels[ii])
+            ax2.plot(Pt_in[ii] / P_vec[ii, :], FundDerGamma[ii, :], lw=2, label=self.labels[ii])
+            ax3.plot(M_vec[ii, :], D_vec[ii, :], lw=2, label=self.labels[ii])
+            ax4.plot(Pt_in[ii] / P_vec[ii, :], c_vec[ii, :], lw=2, label=self.labels[ii])
+
+            # Plot M=1 lines
+            M1_index = np.abs(M_vec[ii, :] - 1).argmin()
+
+            ax1.plot([Pt_in[ii] / P_vec[ii, M1_index],Pt_in[ii] / P_vec[ii, M1_index]], [0,M_vec[ii, M1_index]], color='grey', linestyle='--')
+            ax1.plot([0,Pt_in[ii] / P_vec[ii, M1_index]], [M_vec[ii, M1_index],M_vec[ii, M1_index]],             color='grey', linestyle='--')
+            ax3.plot([M_vec[ii, M1_index],M_vec[ii, M1_index]],[0,D_vec[ii, M1_index]], color='grey', linestyle='--') 
+            ax3.plot([0,M_vec[ii, M1_index]],[D_vec[ii, M1_index],D_vec[ii, M1_index]], color='grey', linestyle='--')
+
+        # Formatting
+        ax1.grid(1)
+        ax2.grid(1)
+        ax3.grid(1)
+        ax1.set_xlim(left=1)
+        ax2.set_xlim(left=1)
+        ax1.set_xlabel(r'$\beta_\mathrm{ts}$ [-]')
+        ax1.set_ylabel('$M$ [-]')
+        ax2.set_xlabel(r'$\beta_\mathrm{ts}$ [-]')
+        ax2.set_ylabel(r'$\Gamma$ [-]')
+        ax3.set_xlabel('$M$ [-]')
+        ax3.set_ylabel(r'$\rho$ [$kg/m^3$]')
+        ax4.set_xlabel(r'$\beta_\mathrm{ts}$ [-]')
+        ax4.set_ylabel('$c$ [$m/s$]')
+        handles1, labels1 = ax1.get_legend_handles_labels()
+        handles2, labels2 = ax2.get_legend_handles_labels()
+        handles3, labels3 = ax3.get_legend_handles_labels()  
+        handles4, labels4 = ax4.get_legend_handles_labels()  
+        ax1.legend(handles1, labels1, loc = 'upper left')
+        ax2.legend(handles2, labels2, loc = 'lower right')
+        ax3.legend(handles3, labels3, loc = 'upper right')
+        ax4.legend(handles4, labels4, loc = 'upper right')
+
+        # Save figs
+        fig1.savefig(self.jpeg_dir + '/allMach_vs_beta_' + self.labels[ii] + '.jpeg')
+        fig2.savefig(self.jpeg_dir + '/allFundDer_vs_beta_' + self.labels[ii] + '.jpeg')
+        fig3.savefig(self.jpeg_dir + '/rho_vs_Mach_'     + self.labels[ii] + '.jpeg')
+        fig4.savefig(self.jpeg_dir + '/c_vs_beta_'     + self.labels[ii] + '.jpeg')
+
+        fig1.savefig(self.tiff_dir + '/allMach_vs_beta_' + self.labels[ii] + '.tiff')
+        fig2.savefig(self.tiff_dir + '/allFundDer_vs_beta_' + self.labels[ii] + '.tiff')
+        fig3.savefig(self.tiff_dir + '/rho_vs_Mach_'     + self.labels[ii] + '.tiff')
+        fig4.savefig(self.tiff_dir + '/c_vs_beta_'     + self.labels[ii] + '.tiff')
+
+        plt.close(fig1)
+        plt.close(fig2)
+        plt.close(fig3)
+        plt.close(fig4)
 
         return
 

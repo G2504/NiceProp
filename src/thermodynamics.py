@@ -50,26 +50,32 @@ class ThermodynamicModel:
         self.N = 2 * self.cv0 / self.R
         self.gamma_id = self.cp0 / self.cv0
         self.MachEdge = MachEdge
+        if settings['liquid phase'] == 'y' or settings['liquid phase'] == 'Y':
+            self.calc_liquid = True
+        else:
+            self.calc_liquid = False
 
         # initialize thermodynamic and themo-physical properties of interest
         self.FundDerGamma = np.zeros((self.samples, self.samples))
-        self.Z = np.zeros((self.samples, self.samples))
-        self.gamma = np.zeros((self.samples, self.samples))
-        self.gamma_PT = np.zeros((self.samples, self.samples))
-        self.gamma_Pv = np.zeros((self.samples, self.samples))
-        self.gamma_Tv = np.zeros((self.samples, self.samples))
-        self.Eckert = np.zeros((self.samples, self.samples))
-        self.Gruneisen = np.zeros((self.samples, self.samples))
-        self.mu = np.zeros((self.samples, self.samples))
-        self.k = np.zeros((self.samples, self.samples))
-        self.Cv = np.zeros((self.samples, self.samples))
-        self.Cp = np.zeros((self.samples, self.samples))
+        self.Z            = np.zeros((self.samples, self.samples))
+        self.gamma        = np.zeros((self.samples, self.samples))
+        self.gamma_PT     = np.zeros((self.samples, self.samples))
+        self.gamma_Pv     = np.zeros((self.samples, self.samples))
+        self.gamma_Tv     = np.zeros((self.samples, self.samples))
+        self.Eckert       = np.zeros((self.samples, self.samples))
+        self.Gruneisen    = np.zeros((self.samples, self.samples))
+        self.mu           = np.zeros((self.samples, self.samples))
+        self.k            = np.zeros((self.samples, self.samples))
+        self.Cv           = np.zeros((self.samples, self.samples))
+        self.Cp           = np.zeros((self.samples, self.samples))
+        self.D            = np.zeros((self.samples, self.samples))
+        self.c            = np.zeros((self.samples, self.samples))
 
         # compute inlet state and initialize outlet state
         self.Pt_in = np.zeros(len(settings['inlet input 1']))
         self.Tt_in = np.zeros(len(settings['inlet input 1']))
         self.ht_in = np.zeros(len(settings['inlet input 1']))
-        self.s_in = np.zeros(len(settings['inlet input 1']))
+        self.s_in  = np.zeros(len(settings['inlet input 1']))
         self.Dt_in = np.zeros(len(settings['inlet input 1']))
         self.P_out = np.zeros(len(settings['inlet input 1']))
         self.T_out = np.zeros(len(settings['inlet input 1']))
@@ -92,6 +98,8 @@ class ThermodynamicModel:
             self.Dt_in[ii] = self.EoS.rhomass()
             self.s_in[ii] = self.EoS.smass()
         self.Tecplot = WriteTecplotData
+
+        
 
     def TsContour(self):
         """
@@ -194,6 +202,7 @@ class ThermodynamicModel:
                         try:
                             self.EoS.update(CoolProp.SmassT_INPUTS, s_matrix[jj], T_vec[ii])
                             rho = self.EoS.rhomass()
+                            self.D[ii, jj] = rho
                             P = self.EoS.p()
                             self.FundDerGamma[ii, jj] = self.EoS.fundamental_derivative_of_gas_dynamics()
                             self.Z[ii, jj] = P / (rho * self.R * T_vec[ii])
@@ -215,6 +224,7 @@ class ThermodynamicModel:
                                                              self.MachEdge ** 2)
                             self.mu[ii, jj] = self.EoS.viscosity()
                             self.k[ii, jj] = self.EoS.conductivity()
+                            self.c[ii, jj] = self.EoS.speed_sound()
                         except:
                             self.FundDerGamma[ii, jj] = np.nan
                             self.Z[ii, jj] = np.nan
@@ -228,11 +238,14 @@ class ThermodynamicModel:
                             self.k[ii, jj] = np.nan
                             self.Cp[ii, jj] = np.nan
                             self.Cv[ii, jj] = np.nan
+                            self.D[ii, jj] = np.nan
+                            self.c[ii, jj] = np.nan
                     # compute thermo-physical properties in the liquid region
-                    elif s_matrix[jj] <= s_sat_l[ii]:
+                    elif s_matrix[jj] <= s_sat_l[ii] and self.calc_liquid:
                         try:
                             self.EoS.update(CoolProp.SmassT_INPUTS, s_matrix[jj], T_vec[ii])
                             rho = self.EoS.rhomass()
+                            self.D[ii, jj] = rho
                             P = self.EoS.p()
                             self.FundDerGamma[ii, jj] = self.EoS.fundamental_derivative_of_gas_dynamics()
                             self.Z[ii, jj] = P / (rho * self.R * T_vec[ii])
@@ -254,6 +267,7 @@ class ThermodynamicModel:
                                                              self.MachEdge ** 2)
                             self.mu[ii, jj] = self.EoS.viscosity()
                             self.k[ii, jj] = self.EoS.conductivity()
+                            self.c[ii, jj] = self.EoS.speed_sound()
                         except:
                             self.FundDerGamma[ii, jj] = np.nan
                             self.Z[ii, jj] = np.nan
@@ -267,6 +281,8 @@ class ThermodynamicModel:
                             self.k[ii, jj] = np.nan
                             self.Cp[ii, jj] = np.nan
                             self.Cv[ii, jj] = np.nan
+                            self.D[ii, jj] = np.nan
+                            self.c[ii, jj] = np.nan
                     else:
                         # two-phase region, no calculation of properties
                         self.FundDerGamma[ii, jj] = np.nan
@@ -281,35 +297,98 @@ class ThermodynamicModel:
                         self.k[ii, jj] = np.nan
                         self.Cp[ii, jj] = np.nan
                         self.Cv[ii, jj] = np.nan
+                        self.D[ii, jj] = np.nan
+                        self.c[ii, jj] = np.nan
             # compute thermo-physical properties in the supercritical region
             else:
                 for jj in range(self.samples):
-                    # if s_matrix[jj] >= self.sc:
-                    try:
-                        self.EoS.update(CoolProp.SmassT_INPUTS, s_matrix[jj], T_vec[ii])
-                        rho = self.EoS.rhomass()
-                        P = self.EoS.p()
-                        cp = self.EoS.cpmass()
-                        cv = self.EoS.cvmass()
-                        self.Cp[ii, jj] = cp
-                        self.Cv[ii, jj] = cv
-                        self.FundDerGamma[ii, jj] = self.EoS.fundamental_derivative_of_gas_dynamics()
-                        self.Z[ii, jj] = P / (rho * self.R * T_vec[ii])
-                        dP_dT_v = self.EoS.first_partial_deriv(CoolProp.iP, CoolProp.iT, CoolProp.iDmass)
-                        dP_dv_T = (- 1 / (rho ** 2) *
-                                   self.EoS.first_partial_deriv(CoolProp.iDmass, CoolProp.iP, CoolProp.iT)) ** (-1)
-                        dv_dT_P = - 1 / (rho ** 2) * \
-                                  self.EoS.first_partial_deriv(CoolProp.iDmass, CoolProp.iT, CoolProp.iP)
-                        self.gamma[ii, jj] = cp / cv
-                        self.gamma_Tv[ii, jj] = 1 + 1 / (rho * cv) * dP_dT_v
-                        self.gamma_Pv[ii, jj] = - 1 / (P * rho) * cp / cv * dP_dv_T
-                        self.gamma_PT[ii, jj] = 1 / (1 - P / cp * dv_dT_P)
-                        self.Eckert[ii, jj] = self.EoS.speed_sound() ** 2 / (cp * T_vec[ii])
-                        self.Gruneisen[ii, jj] = np.sqrt(self.Eckert[ii, jj] * (self.FundDerGamma[ii, jj] - 1) /
-                                                         self.MachEdge ** 2)
-                        self.mu[ii, jj] = self.EoS.viscosity()
-                        self.k[ii, jj] = self.EoS.conductivity()
-                    except:
+                    if s_matrix[jj] >= self.sc:
+                        try:
+                            self.EoS.update(CoolProp.SmassT_INPUTS, s_matrix[jj], T_vec[ii])
+                            rho = self.EoS.rhomass()
+                            self.D[ii, jj] = rho
+                            P = self.EoS.p()
+                            cp = self.EoS.cpmass()
+                            cv = self.EoS.cvmass()
+                            self.Cp[ii, jj] = cp
+                            self.Cv[ii, jj] = cv
+                            self.FundDerGamma[ii, jj] = self.EoS.fundamental_derivative_of_gas_dynamics()
+                            self.Z[ii, jj] = P / (rho * self.R * T_vec[ii])
+                            dP_dT_v = self.EoS.first_partial_deriv(CoolProp.iP, CoolProp.iT, CoolProp.iDmass)
+                            dP_dv_T = (- 1 / (rho ** 2) *
+                                    self.EoS.first_partial_deriv(CoolProp.iDmass, CoolProp.iP, CoolProp.iT)) ** (-1)
+                            dv_dT_P = - 1 / (rho ** 2) * \
+                                    self.EoS.first_partial_deriv(CoolProp.iDmass, CoolProp.iT, CoolProp.iP)
+                            self.gamma[ii, jj] = cp / cv
+                            self.gamma_Tv[ii, jj] = 1 + 1 / (rho * cv) * dP_dT_v
+                            self.gamma_Pv[ii, jj] = - 1 / (P * rho) * cp / cv * dP_dv_T
+                            self.gamma_PT[ii, jj] = 1 / (1 - P / cp * dv_dT_P)
+                            self.Eckert[ii, jj] = self.EoS.speed_sound() ** 2 / (cp * T_vec[ii])
+                            self.Gruneisen[ii, jj] = np.sqrt(self.Eckert[ii, jj] * (self.FundDerGamma[ii, jj] - 1) /
+                                                            self.MachEdge ** 2)
+                            self.mu[ii, jj] = self.EoS.viscosity()
+                            self.k[ii, jj] = self.EoS.conductivity()
+                            self.c[ii, jj] = self.EoS.speed_sound()
+                        except:
+                            self.FundDerGamma[ii, jj] = np.nan
+                            self.Z[ii, jj] = np.nan
+                            self.gamma[ii, jj] = np.nan
+                            self.gamma_PT[ii, jj] = np.nan
+                            self.gamma_Pv[ii, jj] = np.nan
+                            self.gamma_Tv[ii, jj] = np.nan
+                            self.Eckert[ii, jj] = np.nan
+                            self.Gruneisen[ii, jj] = np.nan
+                            self.mu[ii, jj] = np.nan
+                            self.k[ii, jj] = np.nan
+                            self.Cp[ii, jj] = np.nan
+                            self.Cv[ii, jj] = np.nan
+                            self.D[ii, jj] = np.nan
+                            self.c[ii, jj] = np.nan
+                    # compute thermo-physical properties in the liquid region
+                    elif self.calc_liquid:
+                        try:
+                            self.EoS.update(CoolProp.SmassT_INPUTS, s_matrix[jj], T_vec[ii])
+                            rho = self.EoS.rhomass()
+                            self.D[ii, jj] = rho
+                            P = self.EoS.p()
+                            cp = self.EoS.cpmass()
+                            cv = self.EoS.cvmass()
+                            self.Cp[ii, jj] = cp
+                            self.Cv[ii, jj] = cv
+                            self.FundDerGamma[ii, jj] = self.EoS.fundamental_derivative_of_gas_dynamics()
+                            self.Z[ii, jj] = P / (rho * self.R * T_vec[ii])
+                            dP_dT_v = self.EoS.first_partial_deriv(CoolProp.iP, CoolProp.iT, CoolProp.iDmass)
+                            dP_dv_T = (- 1 / (rho ** 2) *
+                                    self.EoS.first_partial_deriv(CoolProp.iDmass, CoolProp.iP, CoolProp.iT)) ** (-1)
+                            dv_dT_P = - 1 / (rho ** 2) * \
+                                    self.EoS.first_partial_deriv(CoolProp.iDmass, CoolProp.iT, CoolProp.iP)
+                            self.gamma[ii, jj] = cp / cv
+                            self.gamma_Tv[ii, jj] = 1 + 1 / (rho * cv) * dP_dT_v
+                            self.gamma_Pv[ii, jj] = - 1 / (P * rho) * cp / cv * dP_dv_T
+                            self.gamma_PT[ii, jj] = 1 / (1 - P / cp * dv_dT_P)
+                            self.Eckert[ii, jj] = self.EoS.speed_sound() ** 2 / (cp * T_vec[ii])
+                            self.Gruneisen[ii, jj] = np.sqrt(self.Eckert[ii, jj] * (self.FundDerGamma[ii, jj] - 1) /
+                                                            self.MachEdge ** 2)
+                            self.mu[ii, jj] = self.EoS.viscosity()
+                            self.k[ii, jj] = self.EoS.conductivity()
+                            self.c[ii, jj] = self.EoS.speed_sound()
+                        except:
+                            self.FundDerGamma[ii, jj] = np.nan
+                            self.Z[ii, jj] = np.nan
+                            self.gamma[ii, jj] = np.nan
+                            self.gamma_PT[ii, jj] = np.nan
+                            self.gamma_Pv[ii, jj] = np.nan
+                            self.gamma_Tv[ii, jj] = np.nan
+                            self.Eckert[ii, jj] = np.nan
+                            self.Gruneisen[ii, jj] = np.nan
+                            self.mu[ii, jj] = np.nan
+                            self.k[ii, jj] = np.nan
+                            self.Cp[ii, jj] = np.nan
+                            self.Cv[ii, jj] = np.nan
+                            self.D[ii, jj] = np.nan
+                            self.c[ii, jj] = np.nan                    
+                    # skip liquid region if set in input
+                    elif not self.calc_liquid:
                         self.FundDerGamma[ii, jj] = np.nan
                         self.Z[ii, jj] = np.nan
                         self.gamma[ii, jj] = np.nan
@@ -322,6 +401,8 @@ class ThermodynamicModel:
                         self.k[ii, jj] = np.nan
                         self.Cp[ii, jj] = np.nan
                         self.Cv[ii, jj] = np.nan
+                        self.D[ii, jj] = np.nan
+                        self.c[ii, jj] = np.nan
 
         # compute critical isobaric line
         for jj in range(self.samples):
@@ -339,10 +420,10 @@ class ThermodynamicModel:
         self.plotClass('output/' + self.fluid + '/Ts')
 
         print("  Creating contour of fundamental derivative...")
-        self.plotClass.PlotTsContour(self.FundDerGamma, 'FundamentalDerivative', r'$\Gamma$ [-]')
+        self.plotClass.PlotTsContour(self.FundDerGamma, 'FundamentalDerivative', r'$\Gamma$ [-]', contour_bounds=(0, 2))
 
         print("  Creating contour of compressibility factor...")
-        self.plotClass.PlotTsContour(self.Z, 'Z', '$Z$ [-]')
+        self.plotClass.PlotTsContour(self.Z, 'Z', '$Z$ [-]', contour_bounds=(0, 1))
 
         print("  Creating contour of gamma...")
         self.plotClass.PlotTsContour(self.gamma, 'gamma', r'$\gamma$ [-]', contour_bounds=(0, 2), powerNorm=True)
@@ -363,10 +444,16 @@ class ThermodynamicModel:
         self.plotClass.PlotTsContour(self.Gruneisen, 'Gruneisen', '$Gr$ [-]')
 
         print("  Creating contour of normalized dynamic viscosity...")
-        self.plotClass.PlotTsContour(self.mu/1.802/10**-5, 'Viscosity', '$\mu$ [-]', powerNorm=True)
+        self.plotClass.PlotTsContour(self.mu/1.802/10**-5, 'Viscosity', '$\mu$ [-]', self.Z, self.FundDerGamma, powerNorm=True, isolines=True)
 
         print("  Creating contour of normalized thermal conductivity...")
         self.plotClass.PlotTsContour(self.k/24.76/10**-3, 'Conductivity', '$\kappa$ [-]', powerNorm=True)
+
+        print("  Creating contour of density...")
+        self.plotClass.PlotTsContour(self.D, 'Density', r'$\rho$ [$kg/m^3$]', self.Z, self.FundDerGamma, isolines=True)
+
+        print("  Creating contour of speed of sound...")
+        self.plotClass.PlotTsContour(self.c, 'Speed_of_sound', '$c$ [$m/s$]', self.Z, self.FundDerGamma, isolines=True, contour_bounds=(0, 300))
 
         if self.Tecplot:
             print("  Generating data file for Tecplot...")
@@ -470,6 +557,7 @@ class ThermodynamicModel:
                 if P_grid[ii, jj] > 0.0:
                     self.EoS.update(CoolProp.PT_INPUTS, P_grid[ii, jj], T_grid[ii, jj])
                     rho = self.EoS.rhomass()
+                    self.D[ii, jj] = rho
                     cp = self.EoS.cpmass()
                     cv = self.EoS.cvmass()
                     self.Cp[ii, jj] = cp
@@ -489,6 +577,7 @@ class ThermodynamicModel:
                                                      self.MachEdge ** 2)
                     self.mu[ii, jj] = self.EoS.viscosity()
                     self.k[ii, jj] = self.EoS.conductivity()
+                    self.c[ii, jj] = self.EoS.speed_sound()
                 else:
                     self.FundDerGamma[ii, jj] = np.nan
                     self.Z[ii, jj] = np.nan
@@ -502,6 +591,8 @@ class ThermodynamicModel:
                     self.k[ii, jj] = np.nan
                     self.Cp[ii, jj] = np.nan
                     self.Cv[ii, jj] = np.nan
+                    self.D[ii, jj] = np.nan
+                    self.c[ii, jj] = np.nan
 
         # compute critical isobaric line
         Pc_isobaric[:] = self.Pc
@@ -515,7 +606,7 @@ class ThermodynamicModel:
         self.plotClass = Plot(T_grid, P_grid, self.Tc, self.Pc, T_sat, P_sat, self.Tt_in, self.T_out,
                               self.Pt_in, self.P_out, T_isentropic, P_isentropic, self.labels, plot_process,
                               xc_iso=Tc_isobaric, yc_iso=Pc_isobaric, x_Widom=T_Widom_line, y_Widom=P_Widom_line)
-
+        
         self.plotClass('output/' + self.fluid + '/PT')
 
         print("  Creating contour of fundamental derivative...")
@@ -525,16 +616,16 @@ class ThermodynamicModel:
         self.plotClass.PlotPTContour(self.Z, 'Z', '$Z$ [-]')
 
         print("  Creating contour of gamma...")
-        self.plotClass.PlotPTContour(self.gamma, 'gamma', r'$\gamma$ [-]')
+        self.plotClass.PlotPTContour(self.gamma, 'gamma', r'$\gamma$ [-]', powerNorm=True)
 
-        print("  Creating contour of gamma_PT...")
-        self.plotClass.PlotPTContour(self.gamma_PT, 'gamma PT', r'$\gamma_{PT}$ [-]')
+        print("  Creating contour of gamma PT...")
+        self.plotClass.PlotPTContour(self.gamma_PT, 'gamma_PT', r'$\gamma_{PT}$ [-]')
 
-        print("  Creating contour of gamma_Pv...")
-        self.plotClass.PlotPTContour(self.gamma_Pv, 'gamma Pv', r'$\gamma_{Pv}$ [-]')
+        print("  Creating contour of gamma Pv...")
+        self.plotClass.PlotPTContour(self.gamma_Pv, 'gamma_Pv', r'$\gamma_{Pv}$ [-]', powerNorm=True)
 
-        print("  Creating contour of gamma_Tv...")
-        self.plotClass.PlotPTContour(self.gamma_Tv, 'gamma Tv', r'$\gamma_{Tv}$ [-]')
+        print("  Creating contour of gamma Tv...")
+        self.plotClass.PlotPTContour(self.gamma_Tv, 'gamma_Tv', r'$\gamma_{Tv}$ [-]')
 
         print("  Creating contour of Eckert number...")
         self.plotClass.PlotPTContour(self.Eckert, 'Eckert', '$Eck$ [-]')
@@ -543,10 +634,16 @@ class ThermodynamicModel:
         self.plotClass.PlotPTContour(self.Gruneisen, 'Gruneisen', '$Gr$ [-]')
 
         print("  Creating contour of normalized dynamic viscosity...")
-        self.plotClass.PlotPTContour(self.mu/1.802/10**-5, 'Viscosity', '$\mu$ [-]', powerNorm=True)
+        self.plotClass.PlotPTContour(self.mu/1.802/10**-5, 'Viscosity', '$\mu$ [-]', self.Z, self.FundDerGamma, powerNorm=True, isolines=True)
 
         print("  Creating contour of normalized thermal conductivity...")
         self.plotClass.PlotPTContour(self.k/24.76/10**-3, 'Conductivity', '$\kappa$ [-]', powerNorm=True)
+
+        print("  Creating contour of density...")
+        self.plotClass.PlotPTContour(self.D, 'Density', r'$\rho$ [$kg/m^3$]', self.Z, self.FundDerGamma, isolines=True)
+
+        print("  Creating contour of speed of sound...")
+        self.plotClass.PlotPTContour(self.c, 'Speed_of_sound', '$c$ [$m/s$]', self.Z, self.FundDerGamma, isolines=True)
 
         if self.Tecplot:
             print("  Generating data file for Tecplot...")

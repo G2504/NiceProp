@@ -20,7 +20,7 @@ def readConfigFile(config_file):
     :return settings: dictionary collecting the information read from configuration file
     """
     settings = {}
-    file = open('../input/' + config_file, 'r')
+    file = open('input/' + config_file, 'r')
     file.readline()
     file.readline()
     settings['fluid'] = file.readline().rstrip('\n')
@@ -29,6 +29,8 @@ def readConfigFile(config_file):
     file.readline()
     settings['thermodynamic plane'] = file.readline().rstrip('\n')
     file.readline()
+    settings['liquid phase'] = file.readline().split()[0]
+    file.readline()    
     file.readline()
     file.readline()
     settings['process'] = file.readline().rstrip('\n')
@@ -166,3 +168,4 @@ def writeNozzleFlow(results_dir, labels, x_norm, P_vec, D_vec, M_vec):
 
     return
 
+readConfigFile('config_MM.txt')

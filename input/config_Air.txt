@@ -28,9 +28,9 @@ N
 
 ***************************** COMPONENT DESIGN *****************************
 Mass flow rate [kg/s]
-1.0  1.0
+1.0  
 Flow velocity [m/s] --> at inlet for nozzle, at outlet for diffuser
-30.0  30.0
+30.0  
 Geometry: 'rectangular' or 'circular' for nozzle, 'conical' or 'radial' for diffuser
 conical
 

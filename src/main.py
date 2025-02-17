@@ -13,7 +13,6 @@ import time
 import warnings
 from GUI import *
 
-
 if __name__ == '__main__':
     start_time = time.time()
     warnings.filterwarnings("ignore")

@@ -63,6 +63,12 @@ class App(tk.Frame):
         self.q4.grid(row=idx, column=1)
         idx += 1
 
+        tk.Label(self, text="Compute liquid phase? 'Y'or 'N'", justify='left',
+                 font=self.font).grid(row=idx, column=0)
+        self.q36 = tk.Entry(self, font=self.font)
+        self.q36.grid(row=idx, column=1)
+        idx += 1
+
         tk.Label(self, text="\n  ***************************  ISENTROPIC TRANSFORMATION  ***************************  ",
                  justify='center', font=self.font).grid(row=idx)
         idx += 1
@@ -214,6 +220,7 @@ class App(tk.Frame):
             self.settings['equation of state'] = self.q3.get()
             self.settings['thermodynamic plane'] = self.q4.get()
             self.settings['process'] = self.q5.get()
+            self.settings['liquid phase'] = self.q36.get()
             self.settings['design'] = self.q6.get()
             self.settings['alpha'] = float(self.q7.get())
             self.settings['beta'] = float(self.q8.get())
@@ -258,7 +265,7 @@ class App(tk.Frame):
             self.settings['Pr vec'] = np.linspace(float(self.q34.get()), float(self.q35.get()), self.settings['samples'])
 
         self.root.destroy()
-
+        
         thermodynamics = thermo.ThermodynamicModel(self.settings)
         if self.settings['thermodynamic plane'] == 'Ts':
             thermodynamics.TsContour()
@@ -284,5 +291,27 @@ class App(tk.Frame):
                                      "'expansion' or 'compression'")
             else:
                 flow.IdealProcess()
-            print("  Average value(s) of compressibility factor: " + str(flow.Z_mean))
+
+            # Assumed dimensions    # Hake et al. : chord of 30mm, throat of 8mm, span of 50mm
+            dim_assumed = True
+            chord    = 0.07  # meters
+            throat_w = 0.005 # meters
+            m_dot    = 1.4   # kg/s
+
+            # Print statements
+            print("  Ideal process label(s):                                  " + str(self.settings['labels']))
+            print("  Average value(s) of compressibility factor:              " + str(flow.Z_mean))
             print("  Average value(s) of isentropic pressure-volume exponent: " + str(flow.gamma_Pv_mean))
+            print("  Value(s) of exit Mach:                                   " + str(flow.M_vec[:,-1]))
+            print("  Value(s) of exit velocity (m/s):                         " + str(flow.V_vec[:,-1]))
+            print("  Value(s) of exit density (kg/m^3):                       " + str(flow.D_vec[:,-1]))
+            print("  Value(s) of exit dynamic viscosity (Pa*s):               " + str(flow.mu_vec[:,-1]))
+            print("  Value(s) of throat density (kg/m^3):                     " + str(flow.D_throat[:]))
+            print("  Value(s) of throat velocity (m/s):                       " + str(flow.V_throat[:]))
+            if dim_assumed:
+                print("  Value(s) of exit Reynolds number:                    " + str((flow.D_vec[:,-1]*flow.V_throat[:]*chord)/flow.mu_vec[:,-1]))
+                print("  Values of blade height (mm) for 3 passages:          " + str(m_dot/(3*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000))
+                print("  Values of blade height (mm) for 4 passages:          " + str(m_dot/(4*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000))
+                print("  Values of blade height (mm) for 5 passages:          " + str(m_dot/(5*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000))
+                print("  Values of blade height (mm) for 6 passages:          " + str(m_dot/(6*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000))
+

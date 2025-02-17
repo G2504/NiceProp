@@ -46,7 +46,9 @@ class IsentropicFlowModel:
         self.Pt_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.T_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.D_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
+        self.D_throat = np.zeros(len(self.thermo.Tt_in))
         self.V_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
+        self.V_throat = np.zeros(len(self.thermo.Tt_in))
         self.M_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.A_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.R_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
@@ -57,6 +59,9 @@ class IsentropicFlowModel:
         self.Z_mean = np.zeros(len(self.thermo.Tt_in))
         self.gamma_Pv_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.gamma_Pv_mean = np.zeros(len(self.thermo.Tt_in))
+        self.mu_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
+        self.FundDerGamma = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
+        self.c_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.thermo.Pt_in_diff = np.zeros(len(self.thermo.Tt_in))
         self.Cp_diff = np.zeros(len(self.thermo.Tt_in))
         self.P_diff = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
@@ -100,6 +105,9 @@ class IsentropicFlowModel:
                 self.Z_vec[ii, jj] = self.P_vec[ii, jj] / (self.D_vec[ii, jj] * self.thermo.R * self.T_vec[ii, jj])
                 self.Z_mean[ii] = np.mean(self.Z_vec[ii, :])
                 self.gamma[ii, jj] = self.thermo.EoS.cpmass() / self.thermo.EoS.cvmass()
+                self.mu_vec[ii, jj] = self.thermo.EoS.viscosity()
+                self.FundDerGamma[ii, jj] = self.thermo.EoS.fundamental_derivative_of_gas_dynamics()
+                self.c_vec[ii, jj] = self.thermo.EoS.speed_sound()
                 dP_dv_T = (- 1 / (self.D_vec[ii, jj] ** 2) *
                            self.thermo.EoS.first_partial_deriv(CoolProp.iDmass, CoolProp.iP, CoolProp.iT)) ** (-1)
                 self.gamma_Pv_vec[ii, jj] = - 1 / (self.P_vec[ii, jj] * self.D_vec[ii, jj]) * \
@@ -118,11 +126,16 @@ class IsentropicFlowModel:
                     self.thermo.EoS.update(CoolProp.HmassSmass_INPUTS, self.ht_vec[ii, jj], self.thermo.s_in[ii])
                     self.Pt_vec[ii, jj] = self.thermo.EoS.p()
 
+            # Find density and velocity at throat
+            M1_index = np.abs(self.M_vec[ii, :] - 1).argmin()
+            self.V_throat[ii] = self.V_vec[ii,M1_index]
+            self.D_throat[ii] = self.D_vec[ii,M1_index]
+
             # plotting
             if self.thermo.process == 'expansion':
                 self.thermo.plotClass('output/' + self.thermo.fluid + '/expansion')
                 self.thermo.plotClass.PlotExpansion(self.thermo.Pt_in, self.thermo.Dt_in, self.P_vec, self.D_vec,
-                                                    self.Z_vec, self.gamma_Pv_vec, self.M_vec)
+                                                    self.Z_vec, self.gamma_Pv_vec, self.M_vec, self.FundDerGamma, self.c_vec)
             elif self.thermo.process == 'compression':
                 self.thermo.plotClass('output/' + self.thermo.fluid + '/compression')
                 self.thermo.plotClass.PlotCompression(self.thermo.Pt_in, self.thermo.Dt_in, self.P_vec, self.D_vec,
