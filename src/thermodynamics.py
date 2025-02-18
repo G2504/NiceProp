@@ -420,10 +420,10 @@ class ThermodynamicModel:
         self.plotClass('output/' + self.fluid + '/Ts')
 
         print("  Creating contour of fundamental derivative...")
-        self.plotClass.PlotTsContour(self.FundDerGamma, 'FundamentalDerivative', r'$\Gamma$ [-]', contour_bounds=(0, 2))
+        self.plotClass.PlotTsContour(self.FundDerGamma, 'FundamentalDerivative', r'$\Gamma$ [-]', self.Z, self.FundDerGamma, isolines_Z=True, contour_bounds=(0, 2))
 
         print("  Creating contour of compressibility factor...")
-        self.plotClass.PlotTsContour(self.Z, 'Z', '$Z$ [-]', contour_bounds=(0, 1))
+        self.plotClass.PlotTsContour(self.Z, 'Z', '$Z$ [-]', self.Z, self.FundDerGamma, isolines_fund_der=True, contour_bounds=(0, 1))
 
         print("  Creating contour of gamma...")
         self.plotClass.PlotTsContour(self.gamma, 'gamma', r'$\gamma$ [-]', contour_bounds=(0, 2), powerNorm=True)
@@ -444,16 +444,17 @@ class ThermodynamicModel:
         self.plotClass.PlotTsContour(self.Gruneisen, 'Gruneisen', '$Gr$ [-]')
 
         print("  Creating contour of normalized dynamic viscosity...")
-        self.plotClass.PlotTsContour(self.mu/1.802/10**-5, 'Viscosity', '$\mu$ [-]', self.Z, self.FundDerGamma, powerNorm=True, isolines=True)
+        self.plotClass.PlotTsContour(self.mu/1.802/10**-5, 'Viscosity', '$\mu$ [-]', self.Z, self.FundDerGamma, contour_bounds=(0, 2), 
+                                     powerNorm=True, isolines_Z=True, isolines_fund_der=True)
 
         print("  Creating contour of normalized thermal conductivity...")
         self.plotClass.PlotTsContour(self.k/24.76/10**-3, 'Conductivity', '$\kappa$ [-]', powerNorm=True)
 
         print("  Creating contour of density...")
-        self.plotClass.PlotTsContour(self.D, 'Density', r'$\rho$ [$kg/m^3$]', self.Z, self.FundDerGamma, isolines=True)
+        self.plotClass.PlotTsContour(self.D, 'Density', r'$\rho$ [$kg/m^3$]', self.Z, self.FundDerGamma, isolines_Z=True, isolines_fund_der=True)
 
         print("  Creating contour of speed of sound...")
-        self.plotClass.PlotTsContour(self.c, 'Speed_of_sound', '$c$ [$m/s$]', self.Z, self.FundDerGamma, isolines=True, contour_bounds=(0, 300))
+        self.plotClass.PlotTsContour(self.c, 'Speed_of_sound', '$c$ [$m/s$]', self.Z, self.FundDerGamma, isolines_Z=True, isolines_fund_der=True, contour_bounds=(0, 300))
 
         if self.Tecplot:
             print("  Generating data file for Tecplot...")
@@ -610,10 +611,10 @@ class ThermodynamicModel:
         self.plotClass('output/' + self.fluid + '/PT')
 
         print("  Creating contour of fundamental derivative...")
-        self.plotClass.PlotPTContour(self.FundDerGamma, 'FundamentalDerivative', r'$\Gamma$ [-]')
+        self.plotClass.PlotPTContour(self.FundDerGamma, 'FundamentalDerivative', r'$\Gamma$ [-]', self.Z, self.FundDerGamma, isolines_Z=True)
 
         print("  Creating contour of compressibility factor...")
-        self.plotClass.PlotPTContour(self.Z, 'Z', '$Z$ [-]')
+        self.plotClass.PlotPTContour(self.Z, 'Z', '$Z$ [-]', self.Z, self.FundDerGamma, isolines_fund_der=True)
 
         print("  Creating contour of gamma...")
         self.plotClass.PlotPTContour(self.gamma, 'gamma', r'$\gamma$ [-]', powerNorm=True)
@@ -634,16 +635,16 @@ class ThermodynamicModel:
         self.plotClass.PlotPTContour(self.Gruneisen, 'Gruneisen', '$Gr$ [-]')
 
         print("  Creating contour of normalized dynamic viscosity...")
-        self.plotClass.PlotPTContour(self.mu/1.802/10**-5, 'Viscosity', '$\mu$ [-]', self.Z, self.FundDerGamma, powerNorm=True, isolines=True)
+        self.plotClass.PlotPTContour(self.mu/1.802/10**-5, 'Viscosity', '$\mu$ [-]', self.Z, self.FundDerGamma, powerNorm=True, isolines_Z=True, isolines_fund_der=True)
 
         print("  Creating contour of normalized thermal conductivity...")
         self.plotClass.PlotPTContour(self.k/24.76/10**-3, 'Conductivity', '$\kappa$ [-]', powerNorm=True)
 
         print("  Creating contour of density...")
-        self.plotClass.PlotPTContour(self.D, 'Density', r'$\rho$ [$kg/m^3$]', self.Z, self.FundDerGamma, isolines=True)
+        self.plotClass.PlotPTContour(self.D, 'Density', r'$\rho$ [$kg/m^3$]', self.Z, self.FundDerGamma, isolines_Z=True, isolines_fund_der=True)
 
         print("  Creating contour of speed of sound...")
-        self.plotClass.PlotPTContour(self.c, 'Speed_of_sound', '$c$ [$m/s$]', self.Z, self.FundDerGamma, isolines=True)
+        self.plotClass.PlotPTContour(self.c, 'Speed_of_sound', '$c$ [$m/s$]', self.Z, self.FundDerGamma, isolines_Z=True, isolines_fund_der=True)
 
         if self.Tecplot:
             print("  Generating data file for Tecplot...")

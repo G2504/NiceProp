@@ -294,24 +294,25 @@ class App(tk.Frame):
 
             # Assumed dimensions    # Hake et al. : chord of 30mm, throat of 8mm, span of 50mm
             dim_assumed = True
-            chord    = 0.07  # meters
-            throat_w = 0.005 # meters
+            throat_w = 0.004 # meters
             m_dot    = 1.4   # kg/s
+            chord_to_throat = 75/4
 
             # Print statements
             print("  Ideal process label(s):                                  " + str(self.settings['labels']))
-            print("  Average value(s) of compressibility factor:              " + str(flow.Z_mean))
-            print("  Average value(s) of isentropic pressure-volume exponent: " + str(flow.gamma_Pv_mean))
-            print("  Value(s) of exit Mach:                                   " + str(flow.M_vec[:,-1]))
-            print("  Value(s) of exit velocity (m/s):                         " + str(flow.V_vec[:,-1]))
-            print("  Value(s) of exit density (kg/m^3):                       " + str(flow.D_vec[:,-1]))
-            print("  Value(s) of exit dynamic viscosity (Pa*s):               " + str(flow.mu_vec[:,-1]))
-            print("  Value(s) of throat density (kg/m^3):                     " + str(flow.D_throat[:]))
-            print("  Value(s) of throat velocity (m/s):                       " + str(flow.V_throat[:]))
+            print("  Average value(s) of compressibility factor:              " + str(np.round(flow.Z_mean,2)))
+            print("  Average value(s) of isentropic pressure-volume exponent: " + str(np.round(flow.gamma_Pv_mean,2)))
+            print("  Value(s) of exit pressue (bar):                          " + str(np.round(flow.P_vec[:,-1]/100000,2)))
+            print("  Value(s) of exit Mach:                                   " + str(np.round(flow.M_vec[:,-1],2)))
+            print("  Value(s) of exit velocity (m/s):                         " + str(np.round(flow.V_vec[:,-1],2)))
+            print("  Value(s) of exit density (kg/m^3):                       " + str(np.round(flow.D_vec[:,-1],2)))
+            # print("  Value(s) of exit dynamic viscosity (Pa*s):               " + str(np.round(flow.mu_vec[:,-1],1)))
+            print("  Value(s) of throat density (kg/m^3):                     " + str(np.round(flow.D_throat[:],2)))
+            print("  Value(s) of throat velocity (m/s):                       " + str(np.round(flow.V_throat[:],2)))
             if dim_assumed:
-                print("  Value(s) of exit Reynolds number:                    " + str((flow.D_vec[:,-1]*flow.V_throat[:]*chord)/flow.mu_vec[:,-1]))
-                print("  Values of blade height (mm) for 3 passages:          " + str(m_dot/(3*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000))
-                print("  Values of blade height (mm) for 4 passages:          " + str(m_dot/(4*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000))
-                print("  Values of blade height (mm) for 5 passages:          " + str(m_dot/(5*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000))
-                print("  Values of blade height (mm) for 6 passages:          " + str(m_dot/(6*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000))
+                print("  Value(s) of Reynolds number (e6):                   " + str(np.round((flow.D_vec[:,1]*flow.V_vec[:,1]*chord_to_throat*throat_w)/flow.mu_vec[:,1]/1000000,2)))
+                print("  Values of blade height (mm) for 3 passages:              " + str(np.round(m_dot/(3*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000,1)))
+                print("  Values of blade height (mm) for 4 passages:              " + str(np.round(m_dot/(4*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000,1)))
+                print("  Values of blade height (mm) for 5 passages:              " + str(np.round(m_dot/(5*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000,1)))
+                print("  Values of blade height (mm) for 6 passages:              " + str(np.round(m_dot/(6*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000,1)))
 

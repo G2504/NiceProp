@@ -120,8 +120,8 @@ class Plot:
 
         return idx
 
-    def PlotTsContour(self, z, title, cbar_label, Z = None, FundDerGamma=None, nIsoLinesGamma=10, contour_bounds=np.array([0, 0]),
-                      levels=50, powerNorm=False,  isolines=False, powerNormCoeff=0.4):
+    def PlotTsContour(self, z, title, cbar_label, Z = None, FundDerGamma=None, contour_bounds=np.array([0, 0]),
+                      levels=50, powerNorm=False,  isolines_Z=False, isolines_fund_der=False, powerNormCoeff=0.4):
         """ Create contour plot of the thermodynamic quantity z in the reduced T-s plane """
         fig, ax = plt.subplots()
 
@@ -161,19 +161,30 @@ class Plot:
                                  cmap=self.cmap, origin='upper')
                 
         # plot Z and FundDerGamma isolines
-        if isolines:
+        legend_list = []
+        label_list  = []
+        if isolines_Z:
             # Z
-            ZLevels =  [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
-            Z_contour = ax.contour(self.x / self.xc, self.y / self.yc, Z, levels=ZLevels, colors='yellow', alpha=1)
-            ax.clabel(Z_contour, fontsize = 14, fmt = '%.2f')
+            ZLevels =  [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95]
+            Z_contour = ax.contour(self.x / self.xc, self.y / self.yc, Z, levels=ZLevels, colors='orange', alpha=1)
+            ax.clabel(Z_contour, fontsize = 14, fmt = '%.2f', manual=False)
+            # Legend
+            legend_list.append(mpl.lines.Line2D([0], [0], color='orange', lw=2))
+            label_list.append('Z')
+ 
+            
+        if isolines_fund_der:
             # FundDerGamma
-            GammaLevels = np.nanpercentile(FundDerGamma,np.linspace(1,95,nIsoLinesGamma))
-            FundDerGamma_contour = ax.contour(self.x / self.xc, self.y / self.yc, FundDerGamma,  levels=GammaLevels, colors='black', alpha=1, linestyles='--')
-            ax.clabel(FundDerGamma_contour, fontsize = 14, fmt = '%.2f')
+            GammaLevels = [0.4,0.5,0.6,0.7,0.8,0.9,0.95,1.0]
+            FundDerGamma_contour = ax.contour(self.x / self.xc, self.y / self.yc, FundDerGamma,  levels=GammaLevels,
+                                              colors='black', alpha=1, linestyles='--')
+            ax.clabel(FundDerGamma_contour, fontsize = 14, fmt = '%.2f', manual=False)
+            legend_list.append(mpl.lines.Line2D([0], [0], color='black', linestyle='--', lw=2))
+            label_list.append('$\Gamma$')
+
+        if isolines_fund_der or isolines_Z:
             # Create legend
-            legend_line_Z = mpl.lines.Line2D([0], [0], color='yellow', lw=2)
-            legend_line_FDGamma = mpl.lines.Line2D([0], [0], color='black', linestyle='--', lw=2)
-            legend1 = ax.legend([legend_line_Z, legend_line_FDGamma], ['Z', '$\Gamma$'], loc="lower left")
+            legend1 = ax.legend(legend_list, label_list, loc="lower left")
             ax.add_artist(legend1)
 
         # plot settings
@@ -197,8 +208,8 @@ class Plot:
 
         return
 
-    def PlotPTContour(self, z, title, cbar_label, Z = None, FundDerGamma=None, levels=50, nIsoLinesGamma=6,  
-                      powerNorm=False, isolines=False, powerNormCoeff=0.4):
+    def PlotPTContour(self, z, title, cbar_label, Z = None, FundDerGamma=None, levels=50, 
+                      powerNorm=False, isolines_Z=False, isolines_fund_der=False, powerNormCoeff=0.4):
         """ Create contour plot of the thermodynamic quantity z in the reduced P-T plane """
         fig, ax = plt.subplots()
 
@@ -223,19 +234,30 @@ class Plot:
             CS = ax.contourf(self.x / self.xc, self.y / self.yc, z, levels, cmap=self.cmap, origin='upper')
 
         # plot Z and FundDerGamma isolines
-        if isolines:
+        legend_list = []
+        label_list  = []
+        if isolines_Z:
             # Z
-            ZLevels =  [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
-            Z_contour = ax.contour(self.x / self.xc, self.y / self.yc, Z, levels=ZLevels, colors='black', alpha=1)
-            ax.clabel(Z_contour, fontsize = 14, fmt = '%.2f')
+            ZLevels =  [0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95]
+            Z_contour = ax.contour(self.x / self.xc, self.y / self.yc, Z, levels=ZLevels, colors='orange', alpha=1)
+            ax.clabel(Z_contour, fontsize = 14, fmt = '%.2f', manual=False)
+            # Legend
+            legend_list.append(mpl.lines.Line2D([0], [0], color='orange', lw=2))
+            label_list.append('Z')
+ 
+            
+        if isolines_fund_der:
             # FundDerGamma
-            GammaLevels = np.nanpercentile(FundDerGamma,np.linspace(1,100,nIsoLinesGamma))
-            FundDerGamma_contour = ax.contour(self.x / self.xc, self.y / self.yc, FundDerGamma,  levels=GammaLevels, colors='black', alpha=1, linestyles='--')
-            ax.clabel(FundDerGamma_contour, fontsize = 14, fmt = '%.2f')
+            GammaLevels = [0.4,0.5,0.6,0.7,0.8,0.9,0.95,1.0]
+            FundDerGamma_contour = ax.contour(self.x / self.xc, self.y / self.yc, FundDerGamma,  levels=GammaLevels,
+                                              colors='black', alpha=1, linestyles='--')
+            ax.clabel(FundDerGamma_contour, fontsize = 14, fmt = '%.2f', manual=False)
+            legend_list.append(mpl.lines.Line2D([0], [0], color='black', linestyle='--', lw=2))
+            label_list.append('$\Gamma$')
+
+        if isolines_fund_der or isolines_Z:
             # Create legend
-            legend_line_Z = mpl.lines.Line2D([0], [0], color='black', lw=2)
-            legend_line_FDGamma = mpl.lines.Line2D([0], [0], color='black', linestyle='--', lw=2)
-            legend1 = ax.legend([legend_line_Z, legend_line_FDGamma], ['Z', '$\Gamma$'], loc="center left")
+            legend1 = ax.legend(legend_list, label_list, loc="lower left")
             ax.add_artist(legend1)
 
         # plot settings
