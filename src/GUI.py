@@ -14,6 +14,7 @@ import tkinter as tk
 from IO import *
 import thermodynamics as thermo
 import isentropic_process as isos
+import os
 
 
 class App(tk.Frame):
@@ -295,6 +296,7 @@ class App(tk.Frame):
             # Assumed dimensions    # Hake et al. : chord of 30mm, throat of 8mm, span of 50mm
             dim_assumed = True
             throat_w  = 0.0038  # meters
+            pitch     = 0.045   # meters
             chord_to_throat = 75/4
 
             # Max thermal power of ORCHID
@@ -326,8 +328,36 @@ class App(tk.Frame):
                 print("  Values of blade height (mm) for 5 passages:              " + str(np.round(blade_height_5_Pth,1)))
                 print("  Values of blade height (mm) for 6 passages:              " + str(np.round(blade_height_6_Pth,1)))
                 
-                print("  Value(s) of Reynolds number (e6):                        " + str(np.round((flow.D_vec[:,1]*flow.V_vec[:,1]*chord_to_throat*throat_w)/flow.mu_vec[:,1]/1000000,2)))
-                print("  Value(s) of mass flow rate (kg/m3):                      " + str(np.round(flow.D_throat[:]*flow.V_throat[:]*throat_w*blade_height_3_Pth*3/1000,2)))
+                f_vec = flow.D_throat[:]*flow.V_throat[:]*throat_w*blade_height_3_Pth*3/1000 # mass flow rate (kg/s)
+                print("  Value(s) of inlet velocity (m/s):                        " + str(np.round(f_vec/(flow.D_vec[:,0]*pitch*3*blade_height_3_Pth/1000),2)))
+                print("  Value(s) of Reynolds number (e6):                        " + str(np.round((f_vec*chord_to_throat*throat_w)/(flow.mu_vec[:,0]*pitch*3*blade_height_3_Pth/1000)/1000000,2)))
+                print("  Value(s) of mass flow rate (kg/m3):                      " + str(np.round(f_vec,2)))
                 
     
-
+            # Save print statements to .txt file
+            home_dir, _ = os.path.split(os.path.dirname(__file__))
+            dir = os.path.join(home_dir, 'output/' + self.settings['fluid'] + '/expansion')
+            if not os.path.isdir(dir):
+                os.makedirs(dir)
+            with open(os.path.join(dir,self.settings['labels'][-1]+".txt"), "w") as file:
+                print("  Ideal process label(s):                                  " + str(self.settings['labels']),file=file)
+                print("  Average value(s) of compressibility factor:              " + str(np.round(flow.Z_mean,2)),file=file)
+                print("  Average value(s) of isentropic pressure-volume exponent: " + str(np.round(flow.gamma_Pv_mean,2)),file=file)
+                print("  Value(s) of inlet pressue (bar):                         " + str(np.round(flow.P_vec[:,0]/100000,2)),file=file)
+                print("  Value(s) of inlet temp. (K):                             " + str(np.round(flow.T_vec[:,0],2)),file=file)
+                print("  Value(s) of exit pressue (bar):                          " + str(np.round(flow.P_vec[:,-1]/100000,2)),file=file)
+                print("  Value(s) of exit temp. (K):                              " + str(np.round(flow.T_vec[:,-1],2)),file=file)
+                print("  Value(s) of exit Mach:                                   " + str(np.round(flow.M_vec[:,-1],2)),file=file)
+                print("  Value(s) of exit velocity (m/s):                         " + str(np.round(flow.V_vec[:,-1],2)),file=file)
+                print("  Value(s) of throat density (kg/m^3):                     " + str(np.round(flow.D_throat[:],2)),file=file)
+                print("  Value(s) of throat velocity (m/s):                       " + str(np.round(flow.V_throat[:],2)),file=file)
+                print("  Value(s) of throat Z (-):                                " + str(np.round(flow.Z_throat[:],2)),file=file)
+                print("  Value(s) of throat fundamental derivative:               " + str(np.round(flow.FundDerGamma_throat[:],2)),file=file)            
+                if dim_assumed:
+                    print("  Values of blade height (mm) for 3 passages:              " + str(np.round(blade_height_3_Pth,1)),file=file)
+                    print("  Values of blade height (mm) for 4 passages:              " + str(np.round(blade_height_4_Pth,1)),file=file)
+                    print("  Values of blade height (mm) for 5 passages:              " + str(np.round(blade_height_5_Pth,1)),file=file)
+                    print("  Values of blade height (mm) for 6 passages:              " + str(np.round(blade_height_6_Pth,1)),file=file)
+                    print("  Value(s) of inlet velocity (m/s):                        " + str(np.round(f_vec/(flow.D_vec[:,0]*pitch*3*blade_height_3_Pth/1000),2)),file=file)
+                    print("  Value(s) of Reynolds number (e6):                        " + str(np.round((f_vec*chord_to_throat*throat_w)/(flow.mu_vec[:,0]*pitch*3*blade_height_3_Pth/1000)/1000000,2)),file=file)
+                    print("  Value(s) of mass flow rate (kg/m3):                      " + str(np.round(f_vec,2)),file=file)
