@@ -349,16 +349,22 @@ class Plot:
         fig5, ax5 = plt.subplots()  # FundementalDerivative and Z trend vs Mach
 
         # List of colors
-        colors = ['black', 'blue', 'red', 'green', 'grey', 'orange']
+        colors = ['black', 'blue', 'red', 'green', 'orange', 'yellow']
+        
+        # Legend items
+        ax2.plot(0,0,color='xkcd:light grey',label=r'$\Gamma$')
+        ax2.plot(0,0,color='xkcd:light grey',linestyle='dashed',label='Z')
+        ax5.plot(0,0,color='xkcd:light grey',label=r'$\Gamma$')
+        ax5.plot(0,0,color='xkcd:light grey',linestyle='dashed',label='Z')
 
         for ii in range(len(self.labels)):
             ax1.plot(Pt_in[ii] / P_vec[ii, :], M_vec[ii, :], lw=2, label=self.labels[ii])
-            ax2.plot(Pt_in[ii] / P_vec[ii, :], FundDerGamma[ii, :], lw=2, color=colors[ii], label="%s %s" % (r'$\Gamma$ - ', self.labels[ii]))
-            ax2.plot(Pt_in[ii] / P_vec[ii, :], Z_vec[ii, :], lw=2, linestyle='dashed', color=colors[ii], label='Z - '+self.labels[ii])
+            ax2.plot(Pt_in[ii] / P_vec[ii, :], FundDerGamma[ii, :], lw=2, color=colors[ii], label=self.labels[ii])
+            ax2.plot(Pt_in[ii] / P_vec[ii, :], Z_vec[ii, :], lw=2, linestyle='dashed', color=colors[ii])
             ax3.plot(M_vec[ii, :], D_vec[ii, :], lw=2, label=self.labels[ii])
             ax4.plot(Pt_in[ii] / P_vec[ii, :], c_vec[ii, :], lw=2, label=self.labels[ii])
-            ax5.plot(M_vec[ii, :], FundDerGamma[ii, :], lw=2, color=colors[ii], label="%s %s" % (r'$\Gamma$ - ', self.labels[ii]))
-            ax5.plot(M_vec[ii, :], Z_vec[ii, :], lw=2, linestyle = 'dashed', color=colors[ii], label='Z - '+self.labels[ii])
+            ax5.plot(M_vec[ii, :], FundDerGamma[ii, :], lw=2, color=colors[ii], label=self.labels[ii])
+            ax5.plot(M_vec[ii, :], Z_vec[ii, :], lw=2, linestyle = 'dashed', color=colors[ii])
 
             # Plot M=1 lines
             M1_index = np.abs(M_vec[ii, :] - 1).argmin()
