@@ -56,11 +56,13 @@ class IsentropicFlowModel:
         self.R_norm = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.gamma = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.Z_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
+        self.Z_throat = np.zeros((len(self.thermo.Tt_in)))
         self.Z_mean = np.zeros(len(self.thermo.Tt_in))
         self.gamma_Pv_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.gamma_Pv_mean = np.zeros(len(self.thermo.Tt_in))
         self.mu_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.FundDerGamma = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
+        self.FundDerGamma_throat = np.zeros((len(self.thermo.Tt_in)))
         self.c_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.thermo.Pt_in_diff = np.zeros(len(self.thermo.Tt_in))
         self.Cp_diff = np.zeros(len(self.thermo.Tt_in))
@@ -126,10 +128,12 @@ class IsentropicFlowModel:
                     self.thermo.EoS.update(CoolProp.HmassSmass_INPUTS, self.ht_vec[ii, jj], self.thermo.s_in[ii])
                     self.Pt_vec[ii, jj] = self.thermo.EoS.p()
 
-            # Find density and velocity at throat
+            # Find throat values
             M1_index = np.abs(self.M_vec[ii, :] - 1).argmin()
-            self.V_throat[ii] = self.V_vec[ii,M1_index]
-            self.D_throat[ii] = self.D_vec[ii,M1_index]
+            self.V_throat[ii]            = self.V_vec[ii,M1_index]
+            self.D_throat[ii]            = self.D_vec[ii,M1_index]
+            self.Z_throat[ii]            = self.Z_vec[ii,M1_index]
+            self.FundDerGamma_throat[ii] = self.FundDerGamma[ii,M1_index]            
 
             # plotting
             if self.thermo.process == 'expansion':

@@ -29,7 +29,7 @@ def readConfigFile(config_file):
     file.readline()
     settings['thermodynamic plane'] = file.readline().rstrip('\n')
     file.readline()
-    settings['liquid phase'] = file.readline().split()[0]
+    settings['plot liquid and 2 phase'] = file.readline().split()[0]
     file.readline()    
     file.readline()
     file.readline()

@@ -19,7 +19,7 @@ import os
 class Plot:
     """ Class to plot results computed with the methods of classes ThermodynamicModel and IsentropicFlowModel """
 
-    def __init__(self, x, y, xc, yc, x_sat, y_sat, x_in, x_out, y_in, y_out, x_iso, y_iso, labels,
+    def __init__(self, x, y, xc, yc, x_sat, y_sat, x_in, x_out, y_in, y_out, x_iso, y_iso_in, y_iso_out, labels,
                  plot_process, xc_iso=np.array([]), yc_iso=np.array([]),
                  x_Widom=np.array([]), y_Widom=np.array([]), cmap='viridis'):
         """
@@ -35,9 +35,10 @@ class Plot:
         :param y_in: y-coordinate of the inlet state
         :param y_out: y-coordinate of the outlet state
         :param x_iso: 1D array defining the x-coordinates of the iso curve
-        :param y_iso: 1D array defining the y-coordinates of the iso curve
+        :param y_iso_in: 1D array defining the y-coordinates of the iso curve of the inlet state
+        :param y_iso_out: 1D array defining the y-coordinates of the iso curve of the outlet state
         :param labels: labels associated to the thermodynamic transformations
-               If there are more than one inlet states, then x_sat, y_sat, x_iso, y_iso are 2D arrays;
+               If there are more than one inlet states, then x_sat, y_sat, x_iso, y_iso_in, y_iso_out are 2D arrays;
                x_in, x_out, y_in, y_out are 1D arrays.
         :param plot_process: flag to activate/deactivate plot of isentropic process(es) over the contour plots
 
@@ -69,7 +70,8 @@ class Plot:
         self.y_in = y_in
         self.y_out = y_out
         self.x_iso = x_iso
-        self.y_iso = y_iso
+        self.y_iso_in = y_iso_in
+        self.y_iso_out = y_iso_out
         self.x_Widom = x_Widom
         self.y_Widom = y_Widom
         self.xc_iso = xc_iso
@@ -126,17 +128,20 @@ class Plot:
         fig, ax = plt.subplots()
 
         if self.plot_process:
-            # plot isobaric lines corresponding to the selected inlet states
+            # plot isobaric lines corresponding to the selected inlet and outlet states
             for ii in range(len(self.x_in)):
-                ax.plot(self.x_iso / self.xc, self.y_iso[ii, :] / self.yc, color='xkcd:light grey')
+                ax.plot(self.x_iso / self.xc, self.y_iso_in[ii, :] / self.yc, color='xkcd:light grey')  # inlet state
+                ax.plot(self.x_iso / self.xc, self.y_iso_out[ii, :] / self.yc, color='xkcd:light grey') # outlet state
 
             # plot isentropic transformations(s)
             markers = ['s', 'o', '^', 'D', 'P', 'X', '*']
             for ii in range(len(self.x_in)):
-                ax.plot(self.x_in[ii] / self.xc, self.y_in[ii] / self.yc,
-                        marker=markers[ii], ms=8, color='grey', label=self.labels[ii])
-                ax.plot([self.x_in[ii] / self.xc, self.x_out[ii] / self.xc],
-                        [self.y_in[ii] / self.yc, self.y_out[ii] / self.yc], color='grey')
+                ax.plot(self.x_in[ii] / self.xc, self.y_in[ii] / self.yc,                  # Draw inlet marker for each expansion
+                        marker=markers[ii], ms=8, color='grey', label=self.labels[ii]) 
+                ax.hlines(self.y_out[ii] / self.yc, self.x_out[ii] / self.xc-0.007,         # Draw outlet markers
+                          self.x_out[ii] / self.xc+0.007, linewidth=4, color='grey')                                                    
+                ax.plot([self.x_in[ii] / self.xc, self.x_out[ii] / self.xc],               # Draw iso expansion line
+                        [self.y_in[ii] / self.yc, self.y_out[ii] / self.yc], color='grey') 
 
         # plot saturation curve, critical isobar, and Widom line
         ax.plot(self.x_sat / self.xc, self.y_sat / self.yc, color='black')
@@ -222,9 +227,11 @@ class Plot:
             # plot isentropic transformations(s)
             markers = ['s', 'o', '^', 'D', 'P', 'X', '*']
             for ii in range(len(self.x_in)):
-                ax.plot(self.x_in[ii] / self.xc, self.y_in[ii] / self.yc,
+                ax.plot(self.x_in[ii] / self.xc, self.y_in[ii] / self.yc,                          # inlet state marker
                         marker=markers[ii], ms=10, color='grey', label=self.labels[ii])
-                ax.plot(self.x_iso[ii, :] / self.xc, self.y_iso[ii, :] / self.yc, color='grey')
+                ax.hlines(self.y_out[ii] / self.yc, self.x_out[ii] / self.xc-0.007,                 # Draw outlet markers
+                          self.x_out[ii] / self.xc+0.007, linewidth=4, color='grey')  
+                ax.plot(self.x_iso[ii, :] / self.xc, self.y_iso_in[ii, :] / self.yc, color='grey') # iso exansion line
 
         # create contour plot of the selected thermodynamic quantity z
         if powerNorm:
@@ -336,14 +343,22 @@ class Plot:
 
         # Plot multi-line plots (all expansions in one plot)
         fig1, ax1 = plt.subplots()  # Mach trend vs beta
-        fig2, ax2 = plt.subplots()  # FundementalDerivative trend vs beta
+        fig2, ax2 = plt.subplots()  # FundementalDerivative and Z trend vs beta
         fig3, ax3 = plt.subplots()  # Rho trend vs Mach
         fig4, ax4 = plt.subplots()  # c vs beta
+        fig5, ax5 = plt.subplots()  # FundementalDerivative and Z trend vs Mach
+
+        # List of colors
+        colors = ['black', 'blue', 'red', 'green', 'grey', 'orange']
+
         for ii in range(len(self.labels)):
             ax1.plot(Pt_in[ii] / P_vec[ii, :], M_vec[ii, :], lw=2, label=self.labels[ii])
-            ax2.plot(Pt_in[ii] / P_vec[ii, :], FundDerGamma[ii, :], lw=2, label=self.labels[ii])
+            ax2.plot(Pt_in[ii] / P_vec[ii, :], FundDerGamma[ii, :], lw=2, color=colors[ii], label="%s %s" % (r'$\Gamma$ - ', self.labels[ii]))
+            ax2.plot(Pt_in[ii] / P_vec[ii, :], Z_vec[ii, :], lw=2, linestyle='dashed', color=colors[ii], label='Z - '+self.labels[ii])
             ax3.plot(M_vec[ii, :], D_vec[ii, :], lw=2, label=self.labels[ii])
             ax4.plot(Pt_in[ii] / P_vec[ii, :], c_vec[ii, :], lw=2, label=self.labels[ii])
+            ax5.plot(M_vec[ii, :], FundDerGamma[ii, :], lw=2, color=colors[ii], label="%s %s" % (r'$\Gamma$ - ', self.labels[ii]))
+            ax5.plot(M_vec[ii, :], Z_vec[ii, :], lw=2, linestyle = 'dashed', color=colors[ii], label='Z - '+self.labels[ii])
 
             # Plot M=1 lines
             M1_index = np.abs(M_vec[ii, :] - 1).argmin()
@@ -362,36 +377,42 @@ class Plot:
         ax1.set_xlabel(r'$\beta_\mathrm{ts}$ [-]')
         ax1.set_ylabel('$M$ [-]')
         ax2.set_xlabel(r'$\beta_\mathrm{ts}$ [-]')
-        ax2.set_ylabel(r'$\Gamma$ [-]')
+        ax2.set_ylabel(r'$\Gamma, Z$ [-]')
         ax3.set_xlabel('$M$ [-]')
         ax3.set_ylabel(r'$\rho$ [$kg/m^3$]')
         ax4.set_xlabel(r'$\beta_\mathrm{ts}$ [-]')
         ax4.set_ylabel('$c$ [$m/s$]')
+        ax5.set_xlabel('$M$ [-]')
+        ax5.set_ylabel(r'$\Gamma , Z$ [-]')
         handles1, labels1 = ax1.get_legend_handles_labels()
         handles2, labels2 = ax2.get_legend_handles_labels()
         handles3, labels3 = ax3.get_legend_handles_labels()  
-        handles4, labels4 = ax4.get_legend_handles_labels()  
+        handles4, labels4 = ax4.get_legend_handles_labels()
+        handles5, labels5 = ax5.get_legend_handles_labels()   
         ax1.legend(handles1, labels1, loc = 'upper left')
         ax2.legend(handles2, labels2, loc = 'lower right')
         ax3.legend(handles3, labels3, loc = 'upper right')
         ax4.legend(handles4, labels4, loc = 'upper right')
+        ax5.legend(handles5, labels5, loc = 'lower right')
 
         # Save figs
         fig1.savefig(self.jpeg_dir + '/allMach_vs_beta_' + self.labels[ii] + '.jpeg')
         fig2.savefig(self.jpeg_dir + '/allFundDer_vs_beta_' + self.labels[ii] + '.jpeg')
         fig3.savefig(self.jpeg_dir + '/rho_vs_Mach_'     + self.labels[ii] + '.jpeg')
         fig4.savefig(self.jpeg_dir + '/c_vs_beta_'     + self.labels[ii] + '.jpeg')
+        fig5.savefig(self.jpeg_dir + '/GammaZ_vs_Mach_'     + self.labels[ii] + '.jpeg')
 
         fig1.savefig(self.tiff_dir + '/allMach_vs_beta_' + self.labels[ii] + '.tiff')
         fig2.savefig(self.tiff_dir + '/allFundDer_vs_beta_' + self.labels[ii] + '.tiff')
         fig3.savefig(self.tiff_dir + '/rho_vs_Mach_'     + self.labels[ii] + '.tiff')
         fig4.savefig(self.tiff_dir + '/c_vs_beta_'     + self.labels[ii] + '.tiff')
+        fig5.savefig(self.tiff_dir + '/GammaZ_vs_Mach_'     + self.labels[ii] + '.tiff')
 
         plt.close(fig1)
         plt.close(fig2)
         plt.close(fig3)
         plt.close(fig4)
-
+        plt.close(fig5) 
         return
 
     def PlotCompression(self, Pt_in, Dt_in, P_vec, D_vec, Z_vec, gamma_Pv_vec):

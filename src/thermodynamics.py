@@ -50,10 +50,10 @@ class ThermodynamicModel:
         self.N = 2 * self.cv0 / self.R
         self.gamma_id = self.cp0 / self.cv0
         self.MachEdge = MachEdge
-        if settings['liquid phase'] == 'y' or settings['liquid phase'] == 'Y':
-            self.calc_liquid = True
+        if settings['plot liquid and 2 phase'] == 'y' or settings['plot liquid and 2 phase'] == 'Y':
+            self.calc_liquid_2ph = True
         else:
-            self.calc_liquid = False
+            self.calc_liquid_2ph = False
 
         # initialize thermodynamic and themo-physical properties of interest
         self.FundDerGamma = np.zeros((self.samples, self.samples))
@@ -121,7 +121,8 @@ class ThermodynamicModel:
         s_vec = self.sr_vec * self.sc
 
         Tc_isobaric = np.zeros(self.samples)
-        T_isobaric = np.zeros((len(self.Tt_in), self.samples))
+        T_isobaric_in = np.zeros((len(self.Tt_in), self.samples))
+        T_isobaric_out = np.zeros((len(self.Tt_in), self.samples))
         s_sat_v = []
         s_sat_l = []
         T_Widom_line = []
@@ -189,7 +190,9 @@ class ThermodynamicModel:
             for ii in range(len(self.Pt_in)):
                 for jj in range(self.samples):
                     self.EoS.update(CoolProp.PSmass_INPUTS, self.Pt_in[ii], s_vec[jj])
-                    T_isobaric[ii, jj] = self.EoS.T()
+                    T_isobaric_in[ii, jj] = self.EoS.T() # Inlet state
+                    self.EoS.update(CoolProp.PSmass_INPUTS, self.P_out[ii], s_vec[jj])
+                    T_isobaric_out[ii, jj] = self.EoS.T() # Outlet state                   
 
         # compute the thermodynamic properties of interest (liquid, vapor and supercritical region)
         s_matrix = np.linspace(min(s_vec), max(s_vec), self.samples)
@@ -240,8 +243,8 @@ class ThermodynamicModel:
                             self.Cv[ii, jj] = np.nan
                             self.D[ii, jj] = np.nan
                             self.c[ii, jj] = np.nan
-                    # compute thermo-physical properties in the liquid region
-                    elif s_matrix[jj] <= s_sat_l[ii] and self.calc_liquid:
+                    # compute thermo-physical properties in the liquid region if selected
+                    elif s_matrix[jj] <= s_sat_l[ii] and self.calc_liquid_2ph:
                         try:
                             self.EoS.update(CoolProp.SmassT_INPUTS, s_matrix[jj], T_vec[ii])
                             rho = self.EoS.rhomass()
@@ -283,22 +286,49 @@ class ThermodynamicModel:
                             self.Cv[ii, jj] = np.nan
                             self.D[ii, jj] = np.nan
                             self.c[ii, jj] = np.nan
-                    else:
-                        # two-phase region, no calculation of properties
-                        self.FundDerGamma[ii, jj] = np.nan
-                        self.Z[ii, jj] = np.nan
-                        self.gamma[ii, jj] = np.nan
-                        self.gamma_PT[ii, jj] = np.nan
-                        self.gamma_Pv[ii, jj] = np.nan
-                        self.gamma_Tv[ii, jj] = np.nan
-                        self.Eckert[ii, jj] = np.nan
-                        self.Gruneisen[ii, jj] = np.nan
-                        self.mu[ii, jj] = np.nan
-                        self.k[ii, jj] = np.nan
-                        self.Cp[ii, jj] = np.nan
-                        self.Cv[ii, jj] = np.nan
-                        self.D[ii, jj] = np.nan
-                        self.c[ii, jj] = np.nan
+                    elif self.calc_liquid_2ph:
+                        # compute properties in the two-phase region if selected
+                        try:
+                            self.EoS.update(CoolProp.SmassT_INPUTS, s_matrix[jj], T_vec[ii])
+                            rho = self.EoS.rhomass()
+                            self.D[ii, jj] = rho
+                            P = self.EoS.p()
+                            self.FundDerGamma[ii, jj] = self.EoS.fundamental_derivative_of_gas_dynamics()
+                            self.Z[ii, jj] = P / (rho * self.R * T_vec[ii])
+                            cp = self.EoS.cpmass()
+                            cv = self.EoS.cvmass()
+                            self.Cp[ii, jj] = cp
+                            self.Cv[ii, jj] = cv
+                            dP_dT_v = self.EoS.first_partial_deriv(CoolProp.iP, CoolProp.iT, CoolProp.iDmass)
+                            dP_dv_T = (- 1 / (rho ** 2) *
+                                       self.EoS.first_partial_deriv(CoolProp.iDmass, CoolProp.iP, CoolProp.iT)) ** (-1)
+                            dv_dT_P = - 1 / (rho ** 2) * \
+                                      self.EoS.first_partial_deriv(CoolProp.iDmass, CoolProp.iT, CoolProp.iP)
+                            self.gamma[ii, jj] = cp / cv
+                            self.gamma_Tv[ii, jj] = 1 + 1 / (rho * cv) * dP_dT_v
+                            self.gamma_Pv[ii, jj] = - 1 / (P * rho) * cp / cv * dP_dv_T
+                            self.gamma_PT[ii, jj] = 1 / (1 - P / cp * dv_dT_P)
+                            self.Eckert[ii, jj] = self.EoS.speed_sound() ** 2 / (cp * T_vec[ii])
+                            self.Gruneisen[ii, jj] = np.sqrt(self.Eckert[ii, jj] * (self.FundDerGamma[ii, jj] - 1) /
+                                                             self.MachEdge ** 2)
+                            self.mu[ii, jj] = self.EoS.viscosity()
+                            self.k[ii, jj] = self.EoS.conductivity()
+                            self.c[ii, jj] = self.EoS.speed_sound()
+                        except:
+                            self.FundDerGamma[ii, jj] = np.nan
+                            self.Z[ii, jj] = np.nan
+                            self.gamma[ii, jj] = np.nan
+                            self.gamma_PT[ii, jj] = np.nan
+                            self.gamma_Pv[ii, jj] = np.nan
+                            self.gamma_Tv[ii, jj] = np.nan
+                            self.Eckert[ii, jj] = np.nan
+                            self.Gruneisen[ii, jj] = np.nan
+                            self.mu[ii, jj] = np.nan
+                            self.k[ii, jj] = np.nan
+                            self.Cp[ii, jj] = np.nan
+                            self.Cv[ii, jj] = np.nan
+                            self.D[ii, jj] = np.nan
+                            self.c[ii, jj] = np.nan
             # compute thermo-physical properties in the supercritical region
             else:
                 for jj in range(self.samples):
@@ -345,7 +375,7 @@ class ThermodynamicModel:
                             self.D[ii, jj] = np.nan
                             self.c[ii, jj] = np.nan
                     # compute thermo-physical properties in the liquid region
-                    elif self.calc_liquid:
+                    elif self.calc_liquid_2ph:
                         try:
                             self.EoS.update(CoolProp.SmassT_INPUTS, s_matrix[jj], T_vec[ii])
                             rho = self.EoS.rhomass()
@@ -388,7 +418,7 @@ class ThermodynamicModel:
                             self.D[ii, jj] = np.nan
                             self.c[ii, jj] = np.nan                    
                     # skip liquid region if set in input
-                    elif not self.calc_liquid:
+                    elif not self.calc_liquid_2ph:
                         self.FundDerGamma[ii, jj] = np.nan
                         self.Z[ii, jj] = np.nan
                         self.gamma[ii, jj] = np.nan
@@ -415,7 +445,7 @@ class ThermodynamicModel:
         # plotting
         print("\n Plotting results ...")
         self.plotClass = Plot(s_matrix, T_vec, self.sc, self.Tc, s_sat, T_sat, self.s_in,
-                              self.s_in + 1e-10, self.Tt_in, self.T_out, s_vec, T_isobaric, self.labels, plot_process,
+                              self.s_in + 1e-10, self.Tt_in, self.T_out, s_vec, T_isobaric_in, T_isobaric_out, self.labels, plot_process,
                               xc_iso=s_vec, yc_iso=Tc_isobaric, x_Widom=s_Widom_line, y_Widom=T_Widom_line)
         self.plotClass('output/' + self.fluid + '/Ts')
 
@@ -605,7 +635,7 @@ class ThermodynamicModel:
         # plotting
         print("\n Plotting results ...")
         self.plotClass = Plot(T_grid, P_grid, self.Tc, self.Pc, T_sat, P_sat, self.Tt_in, self.T_out,
-                              self.Pt_in, self.P_out, T_isentropic, P_isentropic, self.labels, plot_process,
+                              self.Pt_in, self.P_out, T_isentropic, P_isentropic, 0, self.labels, plot_process,
                               xc_iso=Tc_isobaric, yc_iso=Pc_isobaric, x_Widom=T_Widom_line, y_Widom=P_Widom_line)
         
         self.plotClass('output/' + self.fluid + '/PT')

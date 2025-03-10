@@ -63,7 +63,7 @@ class App(tk.Frame):
         self.q4.grid(row=idx, column=1)
         idx += 1
 
-        tk.Label(self, text="Compute liquid phase? 'Y'or 'N'", justify='left',
+        tk.Label(self, text="Compute liquid and two-phase regions? 'Y'or 'N'", justify='left',
                  font=self.font).grid(row=idx, column=0)
         self.q36 = tk.Entry(self, font=self.font)
         self.q36.grid(row=idx, column=1)
@@ -220,7 +220,7 @@ class App(tk.Frame):
             self.settings['equation of state'] = self.q3.get()
             self.settings['thermodynamic plane'] = self.q4.get()
             self.settings['process'] = self.q5.get()
-            self.settings['liquid phase'] = self.q36.get()
+            self.settings['plot liquid and 2 phase'] = self.q36.get()
             self.settings['design'] = self.q6.get()
             self.settings['alpha'] = float(self.q7.get())
             self.settings['beta'] = float(self.q8.get())
@@ -294,25 +294,40 @@ class App(tk.Frame):
 
             # Assumed dimensions    # Hake et al. : chord of 30mm, throat of 8mm, span of 50mm
             dim_assumed = True
-            throat_w = 0.004 # meters
-            m_dot    = 1.4   # kg/s
+            throat_w  = 0.0038  # meters
             chord_to_throat = 75/4
+
+            # Max thermal power of ORCHID
+            P_th_max  = 400000 # W
 
             # Print statements
             print("  Ideal process label(s):                                  " + str(self.settings['labels']))
             print("  Average value(s) of compressibility factor:              " + str(np.round(flow.Z_mean,2)))
             print("  Average value(s) of isentropic pressure-volume exponent: " + str(np.round(flow.gamma_Pv_mean,2)))
+            print("  Value(s) of inlet pressue (bar):                         " + str(np.round(flow.P_vec[:,0]/100000,2)))
+            print("  Value(s) of inlet temp. (K):                             " + str(np.round(flow.T_vec[:,0],2)))
             print("  Value(s) of exit pressue (bar):                          " + str(np.round(flow.P_vec[:,-1]/100000,2)))
+            print("  Value(s) of exit temp. (K):                              " + str(np.round(flow.T_vec[:,-1],2)))
             print("  Value(s) of exit Mach:                                   " + str(np.round(flow.M_vec[:,-1],2)))
             print("  Value(s) of exit velocity (m/s):                         " + str(np.round(flow.V_vec[:,-1],2)))
-            print("  Value(s) of exit density (kg/m^3):                       " + str(np.round(flow.D_vec[:,-1],2)))
-            # print("  Value(s) of exit dynamic viscosity (Pa*s):               " + str(np.round(flow.mu_vec[:,-1],1)))
             print("  Value(s) of throat density (kg/m^3):                     " + str(np.round(flow.D_throat[:],2)))
             print("  Value(s) of throat velocity (m/s):                       " + str(np.round(flow.V_throat[:],2)))
+            print("  Value(s) of throat Z (-):                                " + str(np.round(flow.Z_throat[:],2)))
+            print("  Value(s) of throat fundamental derivative:               " + str(np.round(flow.FundDerGamma_throat[:],2)))            
             if dim_assumed:
-                print("  Value(s) of Reynolds number (e6):                   " + str(np.round((flow.D_vec[:,1]*flow.V_vec[:,1]*chord_to_throat*throat_w)/flow.mu_vec[:,1]/1000000,2)))
-                print("  Values of blade height (mm) for 3 passages:              " + str(np.round(m_dot/(3*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000,1)))
-                print("  Values of blade height (mm) for 4 passages:              " + str(np.round(m_dot/(4*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000,1)))
-                print("  Values of blade height (mm) for 5 passages:              " + str(np.round(m_dot/(5*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000,1)))
-                print("  Values of blade height (mm) for 6 passages:              " + str(np.round(m_dot/(6*throat_w*flow.D_throat[:]*flow.V_throat[:])*1000,1)))
+                # Find max blade height based on max thermal power
+                blade_height_3_Pth = P_th_max/(3*throat_w*flow.D_throat[:]*flow.V_throat[:]*flow.h_vec[:,0])*1000
+                blade_height_4_Pth = P_th_max/(4*throat_w*flow.D_throat[:]*flow.V_throat[:]*flow.h_vec[:,0])*1000
+                blade_height_5_Pth = P_th_max/(5*throat_w*flow.D_throat[:]*flow.V_throat[:]*flow.h_vec[:,0])*1000
+                blade_height_6_Pth = P_th_max/(6*throat_w*flow.D_throat[:]*flow.V_throat[:]*flow.h_vec[:,0])*1000
+
+                print("  Values of blade height (mm) for 3 passages:              " + str(np.round(blade_height_3_Pth,1)))
+                print("  Values of blade height (mm) for 4 passages:              " + str(np.round(blade_height_4_Pth,1)))
+                print("  Values of blade height (mm) for 5 passages:              " + str(np.round(blade_height_5_Pth,1)))
+                print("  Values of blade height (mm) for 6 passages:              " + str(np.round(blade_height_6_Pth,1)))
+                
+                print("  Value(s) of Reynolds number (e6):                        " + str(np.round((flow.D_vec[:,1]*flow.V_vec[:,1]*chord_to_throat*throat_w)/flow.mu_vec[:,1]/1000000,2)))
+                print("  Value(s) of mass flow rate (kg/m3):                      " + str(np.round(flow.D_throat[:]*flow.V_throat[:]*throat_w*blade_height_3_Pth*3/1000,2)))
+                
+    
 
