@@ -14,17 +14,17 @@ expansion
 Do you want to design nozzle/diffuser for expansion/compression process? Y/N
 N
 Total-to-static volumetric flow ratio (it must be 0 if using expansion ratio)
-0.0   0.0   0.0   
+0.0   0.0   0.0
 Total-to-static expansion ratio (it must be 0 if using volumetric flow ratio)
-6.5   6.5   6.5   
+6.5   6.5   6.5  
 Inlet state definition: 'Ts' or 'PT' (independent from the choice of Thermodynamic plane)
-Ts   Ts   Ts   Ts
+Ts   Ts   Ts
 Inlet state definition: first input
-1.01   1.003   1.01
+1.03   1.02   1.027
 Inlet state definition: second input
-0.95   0.95   0.97
+1.10   1.07   1.09   
 Label(s) associated to the thermodynamic process(es)
-2phase   2phase-T   2phase+s
+nonmonotonic   nonmonotonic--s   nonmonotonic-s
 Nozzle geometry is provided as input? Y/N (file nozzleCoordinates.txt should be located in the input folder)
 N
 

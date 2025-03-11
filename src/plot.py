@@ -347,6 +347,7 @@ class Plot:
         fig3, ax3 = plt.subplots()  # Rho trend vs Mach
         fig4, ax4 = plt.subplots()  # c vs beta
         fig5, ax5 = plt.subplots()  # FundementalDerivative and Z trend vs Mach
+        fig6, ax6 = plt.subplots()  # c vs Mach
 
         # List of colors
         colors = ['black', 'blue', 'red', 'green', 'orange', 'yellow']
@@ -365,6 +366,7 @@ class Plot:
             ax4.plot(Pt_in[ii] / P_vec[ii, :], c_vec[ii, :], lw=2, label=self.labels[ii])
             ax5.plot(M_vec[ii, :], FundDerGamma[ii, :], lw=2, color=colors[ii], label=self.labels[ii])
             ax5.plot(M_vec[ii, :], Z_vec[ii, :], lw=2, linestyle = 'dashed', color=colors[ii])
+            ax6.plot(M_vec[ii, :], c_vec[ii, :], lw=2, label=self.labels[ii])
 
             # Plot M=1 lines
             M1_index = np.abs(M_vec[ii, :] - 1).argmin()
@@ -390,16 +392,20 @@ class Plot:
         ax4.set_ylabel('$c$ [$m/s$]')
         ax5.set_xlabel('$M$ [-]')
         ax5.set_ylabel(r'$\Gamma , Z$ [-]')
+        ax6.set_xlabel('$M$ [-]')
+        ax6.set_ylabel('$c$ [$m/s$]')        
         handles1, labels1 = ax1.get_legend_handles_labels()
         handles2, labels2 = ax2.get_legend_handles_labels()
         handles3, labels3 = ax3.get_legend_handles_labels()  
         handles4, labels4 = ax4.get_legend_handles_labels()
         handles5, labels5 = ax5.get_legend_handles_labels()   
+        handles6, labels6 = ax6.get_legend_handles_labels()
         ax1.legend(handles1, labels1, loc = 'upper left')
         ax2.legend(handles2, labels2, loc = 'lower right')
         ax3.legend(handles3, labels3, loc = 'upper right')
-        ax4.legend(handles4, labels4, loc = 'upper right')
+        ax4.legend(handles4, labels4, loc = 'lower right')
         ax5.legend(handles5, labels5, loc = 'lower right')
+        ax4.legend(handles6, labels6, loc = 'lower right')
 
         # Save figs
         fig1.savefig(self.jpeg_dir + '/allMach_vs_beta_' + self.labels[ii] + '.jpeg')
@@ -407,18 +413,21 @@ class Plot:
         fig3.savefig(self.jpeg_dir + '/rho_vs_Mach_'     + self.labels[ii] + '.jpeg')
         fig4.savefig(self.jpeg_dir + '/c_vs_beta_'     + self.labels[ii] + '.jpeg')
         fig5.savefig(self.jpeg_dir + '/GammaZ_vs_Mach_'     + self.labels[ii] + '.jpeg')
+        fig6.savefig(self.jpeg_dir + '/c_vs_Mach_'     + self.labels[ii] + '.jpeg')
 
         fig1.savefig(self.tiff_dir + '/allMach_vs_beta_' + self.labels[ii] + '.tiff')
         fig2.savefig(self.tiff_dir + '/allFundDer_vs_beta_' + self.labels[ii] + '.tiff')
         fig3.savefig(self.tiff_dir + '/rho_vs_Mach_'     + self.labels[ii] + '.tiff')
         fig4.savefig(self.tiff_dir + '/c_vs_beta_'     + self.labels[ii] + '.tiff')
         fig5.savefig(self.tiff_dir + '/GammaZ_vs_Mach_'     + self.labels[ii] + '.tiff')
+        fig6.savefig(self.tiff_dir + '/c_vs_Mach_'     + self.labels[ii] + '.tiff')
 
         plt.close(fig1)
         plt.close(fig2)
         plt.close(fig3)
         plt.close(fig4)
         plt.close(fig5) 
+        plt.close(fig6)
         return
 
     def PlotCompression(self, Pt_in, Dt_in, P_vec, D_vec, Z_vec, gamma_Pv_vec):
