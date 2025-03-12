@@ -329,6 +329,21 @@ class ThermodynamicModel:
                             self.Cv[ii, jj] = np.nan
                             self.D[ii, jj] = np.nan
                             self.c[ii, jj] = np.nan
+                    else:
+                        self.FundDerGamma[ii, jj] = np.nan
+                        self.Z[ii, jj] = np.nan
+                        self.gamma[ii, jj] = np.nan
+                        self.gamma_PT[ii, jj] = np.nan
+                        self.gamma_Pv[ii, jj] = np.nan
+                        self.gamma_Tv[ii, jj] = np.nan
+                        self.Eckert[ii, jj] = np.nan
+                        self.Gruneisen[ii, jj] = np.nan
+                        self.mu[ii, jj] = np.nan
+                        self.k[ii, jj] = np.nan
+                        self.Cp[ii, jj] = np.nan
+                        self.Cv[ii, jj] = np.nan
+                        self.D[ii, jj] = np.nan
+                        self.c[ii, jj] = np.nan
             # compute thermo-physical properties in the supercritical region
             else:
                 for jj in range(self.samples):

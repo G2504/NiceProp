@@ -205,7 +205,7 @@ class Plot:
 
         if self.plot_process:
             handles, labels = ax.get_legend_handles_labels()
-            ax.legend(handles, labels, loc='upper left')
+            ax.legend(handles, labels, loc='lowerd right')
 
         fig.savefig(self.jpeg_dir + '/' + title + '.jpeg')
         fig.savefig(self.tiff_dir + '/' + title + '.tiff')
