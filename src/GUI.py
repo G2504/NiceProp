@@ -337,6 +337,7 @@ class App(tk.Frame):
                 print("  Value(s) of mass flow rate (kg/m3):                      " + str(np.round(f_vec,2)))
                 print("  Value(s) of allowed throat area (mm2)                    " + str(np.round(throat_w*blade_height_3_Pth*3*1000,0)))
                 print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*throat_w*chord_to_throat/(Re_vec**(1/5))*1000,1)))
+                print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_vec/1000,0)))
 
             # Save print statements to .txt file
             home_dir, _ = os.path.split(os.path.dirname(__file__))
@@ -368,3 +369,4 @@ class App(tk.Frame):
                     print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*throat_w*chord_to_throat/(Re_vec**(1/5))*1000,1)),file=file)
                     print("  Value(s) of allowed throat area (mm2)                    " + str(np.round(throat_w*blade_height_3_Pth*3*1000,0)),file=file)
                     print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*throat_w*chord_to_throat/(Re_vec**(1/5))*1000,1)),file=file)
+                    print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_vec/1000,0)),file=file)

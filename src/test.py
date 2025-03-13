@@ -17,3 +17,6 @@ P_s_max_sat = EoS.p()/Pc
 EoS.update(CoolProp.PT_INPUTS, P_s_max_sat*Pc,T_s_max_sat*Tc+5)
 s_min = EoS.smass()
 print(s_min/sc)
+
+
+print(CoolProp.CoolProp.PropsSI('H', 'T', 250+273, 'P', 10e5, 'MM'))
