@@ -22,5 +22,5 @@
   Value(s) of allowed throat area (mm2)                    [120.]
   Value(s) of expected boundary layer thickness (mm)       [0.3]
   Value(s) of h3*mass flow (kW)                            [357.]
-
-
+  mass flow verification value(s) at 150mm2 (kg/s)         [1.16]    #print('mass flow verification value(s) at 150mm2 (kg/s) '  + str(np.round(150e-6*flow.D_throat[:]*flow.V_throat[:],2)))
+  thermal power verification value(s) at 150mm2 (kW)       [500.32]  #print('thermal power verification value(s) at 150mm2 (kW)' + str(np.round(150e-6*flow.D_throat[:]*flow.V_throat[:]*flow.h_vec[:,0]/1000,2)))     
