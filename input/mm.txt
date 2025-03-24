@@ -20,7 +20,7 @@ Total-to-static expansion ratio (it must be 0 if using volumetric flow ratio)
 Inlet state definition: 'Ts' or 'PT' (independent from the choice of Thermodynamic plane)
 Ts   Ts   Ts
 Inlet state definition: first input
-1.02   0.99   1.06 
+1.02   0.99   1.05 
 Inlet state definition: second input
 1.10   1.10   1.4
 Label(s) associated to the thermodynamic process(es)
