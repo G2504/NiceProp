@@ -334,7 +334,7 @@ class App(tk.Frame):
               
                 print("  Value(s) of inlet velocity (m/s):                        " + str(np.round(f_vec/(flow.D_vec[:,0]*pitch*3*blade_height_3_Pth/1000),2)))
                 print("  Value(s) of Reynolds number (e6):                        " + str(np.round(Re_vec/1000000,2)))
-                print("  Value(s) of mass flow rate (kg/m3):                      " + str(np.round(f_vec,2)))
+                print("  Value(s) of mass flow rate (kg/s):                      " + str(np.round(f_vec,2)))
                 print("  Value(s) of allowed throat area (mm2)                    " + str(np.round(throat_w*blade_height_3_Pth*3*1000,0)))
                 print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*throat_w*chord_to_throat/(Re_vec**(1/5))*1000,1)))
                 print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_vec/1000,0)))
@@ -365,7 +365,7 @@ class App(tk.Frame):
                     print("  Values of blade height (mm) for 6 passages:              " + str(np.round(blade_height_6_Pth,1)),file=file)
                     print("  Value(s) of inlet velocity (m/s):                        " + str(np.round(f_vec/(flow.D_vec[:,0]*pitch*3*blade_height_3_Pth/1000),2)),file=file)
                     print("  Value(s) of Reynolds number (e6):                        " + str(np.round(Re_vec/1000000,2)),file=file)
-                    print("  Value(s) of mass flow rate (kg/m3):                      " + str(np.round(f_vec,2)),file=file)
+                    print("  Value(s) of mass flow rate (kg/s):                      " + str(np.round(f_vec,2)),file=file)
                     print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*throat_w*chord_to_throat/(Re_vec**(1/5))*1000,1)),file=file)
                     print("  Value(s) of allowed throat area (mm2)                    " + str(np.round(throat_w*blade_height_3_Pth*3*1000,0)),file=file)
                     print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*throat_w*chord_to_throat/(Re_vec**(1/5))*1000,1)),file=file)
