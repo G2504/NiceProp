@@ -61,7 +61,6 @@ class IsentropicFlowModel:
         self.gamma_Pv_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.gamma_Pv_mean = np.zeros(len(self.thermo.Tt_in))
         self.mu_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
-        self.mu_throat = np.zeros(len(self.thermo.Tt_in))
         self.FundDerGamma = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.FundDerGamma_throat = np.zeros((len(self.thermo.Tt_in)))
         self.c_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
@@ -133,7 +132,6 @@ class IsentropicFlowModel:
             M1_index = np.abs(self.M_vec[ii, :] - 1).argmin()
             self.V_throat[ii]            = self.V_vec[ii,M1_index]
             self.D_throat[ii]            = self.D_vec[ii,M1_index]
-            self.mu_throat[ii]           = self.mu_vec[ii,M1_index]
             self.Z_throat[ii]            = self.Z_vec[ii,M1_index]
             self.FundDerGamma_throat[ii] = self.FundDerGamma[ii,M1_index]            
 

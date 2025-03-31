@@ -295,11 +295,10 @@ class App(tk.Frame):
 
             # Assumed dimensions    # Hake et al. : chord of 30mm, throat of 8mm, span of 50mm
             dim_assumed = True
-            throat_w  = 0.0038  # meters
-            pitch     = 0.045   # meters
-            chord_to_throat = 75/4
+            throat_w  = np.array([0.0038, 0.0038, 0.0038]) # meters
+            chord     = np.array([0.0505, 0.0547, 0.0552]) # meters
 
-            # Max thermal power of ORCHID based soley on h1 (neglecting recouperator influence) 
+            # Max thermal power of ORCHID based soley on h1 (inflow enthalpy) (neglecting recouperator influence) 
             # and taking 20% margin to account for degradation of the radiators
             P_th_max  = 500000*0.8 # W
 
@@ -330,13 +329,13 @@ class App(tk.Frame):
                 print("  Values of blade height (mm) for 6 passages:              " + str(np.round(blade_height_6_Pth,1)))
                 
                 f_vec = flow.D_throat[:]*flow.V_throat[:]*throat_w*blade_height_3_Pth*3/1000 # mass flow rate (kg/s)
-                Re_vec = (f_vec*chord_to_throat*throat_w)/(flow.mu_vec[:,0]*pitch*3*blade_height_3_Pth/1000)
+                Re_vec = (flow.D_vec[:,-1]*flow.c_vec[:,-1]*flow.M_vec[:,-1])/flow.mu_vec[:,-1]
               
                 print("  Value(s) of inlet velocity (m/s):                        " + str(np.round(f_vec/(flow.D_vec[:,0]*pitch*3*blade_height_3_Pth/1000),2)))
                 print("  Value(s) of Reynolds number (e6):                        " + str(np.round(Re_vec/1000000,2)))
                 print("  Value(s) of mass flow rate (kg/s):                      " + str(np.round(f_vec,2)))
                 print("  Value(s) of allowed throat area (mm2)                    " + str(np.round(throat_w*blade_height_3_Pth*3*1000,0)))
-                print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*throat_w*chord_to_throat/(Re_vec**(1/5))*1000,1)))
+                print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*chord/(Re_vec**(1/5))*1000,1)))
                 print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_vec/1000,0)))
 
             # Save print statements to .txt file
@@ -366,7 +365,7 @@ class App(tk.Frame):
                     print("  Value(s) of inlet velocity (m/s):                        " + str(np.round(f_vec/(flow.D_vec[:,0]*pitch*3*blade_height_3_Pth/1000),2)),file=file)
                     print("  Value(s) of Reynolds number (e6):                        " + str(np.round(Re_vec/1000000,2)),file=file)
                     print("  Value(s) of mass flow rate (kg/s):                      " + str(np.round(f_vec,2)),file=file)
-                    print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*throat_w*chord_to_throat/(Re_vec**(1/5))*1000,1)),file=file)
+                    print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*chord/(Re_vec**(1/5))*1000,1)),file=file)
                     print("  Value(s) of allowed throat area (mm2)                    " + str(np.round(throat_w*blade_height_3_Pth*3*1000,0)),file=file)
-                    print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*throat_w*chord_to_throat/(Re_vec**(1/5))*1000,1)),file=file)
+                    print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*chord/(Re_vec**(1/5))*1000,1)),file=file)
                     print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_vec/1000,0)),file=file)
