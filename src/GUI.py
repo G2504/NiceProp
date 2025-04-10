@@ -351,6 +351,7 @@ class App(tk.Frame):
             with open(os.path.join(dir,self.settings['labels'][-1]+".txt"), "w") as file:
                 print("  Ideal process label(s):                                  " + str(self.settings['labels']),file=file)
                 print("  Average value(s) of compressibility factor:              " + str(np.round(flow.Z_mean,3)),file=file)
+                print("  Average value(s) of fundamental derivative of gas dyn.:  " + str(np.round(np.mean(flow.FundDerGamma,axis=1),3)),file=file)
                 print("  Average value(s) of isentropic pressure-volume exponent: " + str(np.round(flow.gamma_Pv_mean,3)),file=file)
                 print("  Value(s) of inlet pressue (bar):                         " + str(np.round(flow.P_vec[:,0]/100000,3)),file=file)
                 print("  Value(s) of inlet temp. (K):                             " + str(np.round(flow.T_vec[:,0],3)),file=file)

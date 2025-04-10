@@ -1,5 +1,6 @@
   Ideal process label(s):                                  ['nonmonotonic', 'nonideal', 'ideal', 'idealOG']
   Average value(s) of compressibility factor:              [0.673 0.765 0.908 0.96 ]
+  Average value(s) of fundamental derivative of gas dyn.:  [0.693 0.749 0.926 0.976]
   Average value(s) of isentropic pressure-volume exponent: [0.728 0.821 0.954 0.994]
   Value(s) of inlet pressue (bar):                         [21.333 15.558  7.725  4.059]
   Value(s) of inlet temp. (K):                             [529.074 513.513 524.406 544.635]
