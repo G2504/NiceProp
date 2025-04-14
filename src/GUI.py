@@ -360,7 +360,7 @@ class App(tk.Frame):
                 print("  Value(s) of exit temp. (K):                              " + str(np.round(flow.T_vec[:,-1],3)),file=file)
                 print("  Value(s) of exit Mach:                                   " + str(np.round(flow.M_vec[:,-1],3)),file=file)
                 print("  Value(s) of exit velocity (m/s):                         " + str(np.round(flow.V_vec[:,-1],3)),file=file)
-                print("  Value(s) of exit viscosity (Pa s):                       " + str(flow.mu_vec[:,-1]))
+                print("  Value(s) of exit viscosity (Pa s):                       " + str(flow.mu_vec[:,-1]),file=file)
                 print("  Value(s) of throat density (kg/m^3):                     " + str(np.round(flow.D_throat[:],3)),file=file)
                 print("  Value(s) of throat velocity (m/s):                       " + str(np.round(flow.V_throat[:],3)),file=file)
                 print("  Value(s) of throat Z (-):                                " + str(np.round(flow.Z_throat[:],3)),file=file)

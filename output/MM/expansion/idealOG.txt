@@ -8,6 +8,7 @@
   Value(s) of exit temp. (K):                              [480.127 476.63  498.239 520.788]
   Value(s) of exit Mach:                                   [1.827 1.829 1.827 1.827]
   Value(s) of exit velocity (m/s):                         [266.53  270.711 287.025 298.123]
+  Value(s) of exit viscosity (Pa s):                       [1.04592032e-05 1.03864816e-05 1.08332214e-05 1.12924646e-05]
   Value(s) of throat density (kg/m^3):                     [96.649 54.814 20.098  9.387]
   Value(s) of throat velocity (m/s):                       [ 96.173 118.912 149.185 161.119]
   Value(s) of throat Z (-):                                [0.597 0.735 0.903 0.958]
