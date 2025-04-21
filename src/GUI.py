@@ -296,9 +296,9 @@ class App(tk.Frame):
             # Assumed dimensions    # Hake et al. : chord of 30mm, throat of 8mm, span of 50mm
             dim_assumed = True
             #                     nonmonotonic, nonideal, ideal, idealOG
-            throat_w  = np.array([3.5,   4.3,   3.5,   6.46 ])/1000 # mm
-            chord     = np.array([46.32, 57.96, 43.95, 79.53])/1000 # mm
-            blade_h   = np.array([5.85,  5.85,  5.85,  5.85 ])/1000 # mm
+            throat_w  = np.array([1.42,  1.75,  3.70,  7.54 ])/1000 # mm
+            chord     = np.array([18.83, 23.56, 46.52, 92.79])/1000 # mm
+            blade_h   = np.array([14.39, 14.39, 14.39, 14.39])/1000 # mm
             n_passages= np.array([5,     5,     5,     5    ])
 
             # Max thermal power of ORCHID based soley on h1 (inflow enthalpy) (neglecting recouperator influence) 
@@ -312,6 +312,7 @@ class App(tk.Frame):
             print("  Average value(s) of fundamental derivative of gas dyn.:  " + str(np.round(np.mean(flow.FundDerGamma,axis=1),3)))
             print("  Value(s) of inlet pressue (bar):                         " + str(np.round(flow.P_vec[:,0]/100000,3)))
             print("  Value(s) of inlet temp. (K):                             " + str(np.round(flow.T_vec[:,0],3)))
+            print("  Value(s) of inlet density (kg/m3):                       " + str(np.round(flow.D_vec[:,0],3)))
             print("  Value(s) of exit pressue (bar):                          " + str(np.round(flow.P_vec[:,-1]/100000,3)))
             print("  Value(s) of exit temp. (K):                              " + str(np.round(flow.T_vec[:,-1],3)))
             print("  Value(s) of exit Mach:                                   " + str(np.round(flow.M_vec[:,-1],3)))
@@ -356,6 +357,7 @@ class App(tk.Frame):
                 print("  Average value(s) of isentropic pressure-volume exponent: " + str(np.round(flow.gamma_Pv_mean,3)),file=file)
                 print("  Value(s) of inlet pressue (bar):                         " + str(np.round(flow.P_vec[:,0]/100000,3)),file=file)
                 print("  Value(s) of inlet temp. (K):                             " + str(np.round(flow.T_vec[:,0],3)),file=file)
+                print("  Value(s) of inlet density (kg/m3):                       " + str(np.round(flow.D_vec[:,0],3)),file=file)
                 print("  Value(s) of exit pressue (bar):                          " + str(np.round(flow.P_vec[:,-1]/100000,3)),file=file)
                 print("  Value(s) of exit temp. (K):                              " + str(np.round(flow.T_vec[:,-1],3)),file=file)
                 print("  Value(s) of exit Mach:                                   " + str(np.round(flow.M_vec[:,-1],3)),file=file)
