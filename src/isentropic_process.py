@@ -61,6 +61,8 @@ class IsentropicFlowModel:
         self.gamma_Pv_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.gamma_Pv_mean = np.zeros(len(self.thermo.Tt_in))
         self.mu_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
+        self.cond_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
+        self.spc_heat_ratio = self.Cp0/self.Cv0
         self.FundDerGamma = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.FundDerGamma_throat = np.zeros((len(self.thermo.Tt_in)))
         self.c_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
@@ -75,6 +77,10 @@ class IsentropicFlowModel:
         self.A_diff = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.L_diff = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.R_diff = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
+
+        self.Cp0 = CoolProp.CoolProp.PropsSI("Cpmass", "T", 500, "P", 10000, self.thermo.fluid)
+        self.Cv0 = CoolProp.CoolProp.PropsSI("Cvmass", "T", 500, "P", 10000, self.thermo.fluid)
+        self.ACENTRIC = CoolProp.CoolProp.PropsSI("ACENTRIC", "T", 500, "P", 10000, self.thermo.fluid)
 
     def IdealProcess(self):
         """ Given the inlet and outlet states, compute flow quantities along an ideal expansion/compression """
@@ -108,6 +114,7 @@ class IsentropicFlowModel:
                 self.Z_mean[ii] = np.mean(self.Z_vec[ii, :])
                 self.gamma[ii, jj] = self.thermo.EoS.cpmass() / self.thermo.EoS.cvmass()
                 self.mu_vec[ii, jj] = self.thermo.EoS.viscosity()
+                self.cond_vec[ii, jj] = self.thermo.EoS.conductivity()
                 self.FundDerGamma[ii, jj] = self.thermo.EoS.fundamental_derivative_of_gas_dynamics()
                 self.c_vec[ii, jj] = self.thermo.EoS.speed_sound()
                 dP_dv_T = (- 1 / (self.D_vec[ii, jj] ** 2) *

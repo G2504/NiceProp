@@ -2,6 +2,10 @@
   Average value(s) of compressibility factor:              [0.673 0.765 0.908 0.96 ]
   Average value(s) of fundamental derivative of gas dyn.:  [0.693 0.749 0.926 0.976]
   Average value(s) of isentropic pressure-volume exponent: [0.728 0.821 0.954 0.994]
+  Average value(s) of viscosity (Pa s):                    [1.11665670e-05 1.08144066e-05 1.11586238e-05 1.15905599e-05]
+  Average value(s) of conductivity (W/m/K):                [0.03411851 0.03053122 0.03071045 0.03242466]
+  Value(s) of ratio of specific heats (ideal gas):         1.026
+  Value(s) of Acentric ratio:                              0.418
   Value(s) of inlet pressue (bar):                         [21.333 15.558  7.725  4.059]
   Value(s) of inlet temp. (K):                             [529.074 513.513 524.406 544.635]
   Value(s) of inlet density (kg/m3):                       [190.792 101.187  33.942  15.58 ]
