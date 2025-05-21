@@ -55,6 +55,7 @@ class IsentropicFlowModel:
         self.x_norm = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.R_norm = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.gamma = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
+        self.ACENTRIC = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.Z_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.Z_throat = np.zeros((len(self.thermo.Tt_in)))
         self.Z_mean = np.zeros(len(self.thermo.Tt_in))
@@ -62,7 +63,6 @@ class IsentropicFlowModel:
         self.gamma_Pv_mean = np.zeros(len(self.thermo.Tt_in))
         self.mu_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.cond_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
-        self.spc_heat_ratio = self.Cp0/self.Cv0
         self.FundDerGamma = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.FundDerGamma_throat = np.zeros((len(self.thermo.Tt_in)))
         self.c_vec = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
@@ -77,10 +77,6 @@ class IsentropicFlowModel:
         self.A_diff = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.L_diff = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
         self.R_diff = np.zeros((len(self.thermo.Tt_in), self.thermo.samples))
-
-        self.Cp0 = CoolProp.CoolProp.PropsSI("Cpmass", "T", 500, "P", 10000, self.thermo.fluid)
-        self.Cv0 = CoolProp.CoolProp.PropsSI("Cvmass", "T", 500, "P", 10000, self.thermo.fluid)
-        self.ACENTRIC = CoolProp.CoolProp.PropsSI("ACENTRIC", "T", 500, "P", 10000, self.thermo.fluid)
 
     def IdealProcess(self):
         """ Given the inlet and outlet states, compute flow quantities along an ideal expansion/compression """
@@ -112,7 +108,8 @@ class IsentropicFlowModel:
                 self.T_vec[ii, jj] = self.thermo.EoS.T()
                 self.Z_vec[ii, jj] = self.P_vec[ii, jj] / (self.D_vec[ii, jj] * self.thermo.R * self.T_vec[ii, jj])
                 self.Z_mean[ii] = np.mean(self.Z_vec[ii, :])
-                self.gamma[ii, jj] = self.thermo.EoS.cpmass() / self.thermo.EoS.cvmass()
+                self.gamma[ii, jj] = self.thermo.EoS.cp0mass() / self.thermo.EoS.cvmass()
+                self.ACENTRIC[ii, jj] = CoolProp.CoolProp.PropsSI("ACENTRIC", "T", self.T_vec[ii,jj], "P", self.P_vec[ii,jj], self.thermo.fluid)
                 self.mu_vec[ii, jj] = self.thermo.EoS.viscosity()
                 self.cond_vec[ii, jj] = self.thermo.EoS.conductivity()
                 self.FundDerGamma[ii, jj] = self.thermo.EoS.fundamental_derivative_of_gas_dynamics()

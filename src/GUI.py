@@ -295,11 +295,11 @@ class App(tk.Frame):
 
             # Assumed dimensions    # Hake et al. : chord of 30mm, throat of 8mm, span of 50mm
             dim_assumed = True
-            #                     nonmonotonic, nonideal, ideal, idealOG
-            throat_w  = np.array([1.42,  1.75,  3.70,  7.54 ])/1000 # mm
-            chord     = np.array([18.83, 23.56, 46.52, 92.79])/1000 # mm
-            blade_h   = np.array([14.39, 14.39, 14.39, 14.39])/1000 # mm
-            n_passages= np.array([5,     5,     5,     5    ])
+            #                     nonmonotonic, nonideal, ideal
+            throat_w  = np.array([3.70,  3.70,  3.70 ])/1000 # mm
+            chord     = np.array([49.154, 49.817, 46.52])/1000 # mm
+            blade_h   = np.array([5.53,  5.53, 5.53])/1000 # mm
+            n_passages= np.array([5,     5,     5    ])
 
             # Max thermal power of ORCHID based soley on h1 (inflow enthalpy) (neglecting recouperator influence) 
             # and taking 20% margin to account for degradation of the radiators
@@ -312,8 +312,8 @@ class App(tk.Frame):
             print("  Average value(s) of fundamental derivative of gas dyn.:  " + str(np.round(np.mean(flow.FundDerGamma,axis=1),3)))
             print("  Average value(s) of viscosity (Pa s):                    " + str(np.mean(flow.mu_vec,axis=1)))
             print("  Average value(s) of conductivity (W/m/K):                " + str(np.mean(flow.cond_vec,axis=1)))
-            print("  Value(s) of ratio of specific heats (ideal gas):         " + str(np.round(flow.spc_heat_ratio,3)))
-            print("  Value(s) of Acentric ratio:                              " + str(np.round(flow.ACENTRIC,3)))
+            print("  Value(s) of ratio of specific heats (ideal gas):         " + str(np.mean(flow.gamma,axis=1)))
+            print("  Value(s) of Acentric ratio:                              " + str(np.mean(flow.ACENTRIC,axis=1)))
             print("  Value(s) of inlet pressue (bar):                         " + str(np.round(flow.P_vec[:,0]/100000,3)))
             print("  Value(s) of inlet temp. (K):                             " + str(np.round(flow.T_vec[:,0],3)))
             print("  Value(s) of inlet density (kg/m3):                       " + str(np.round(flow.D_vec[:,0],3)))
@@ -361,8 +361,8 @@ class App(tk.Frame):
                 print("  Average value(s) of isentropic pressure-volume exponent: " + str(np.round(flow.gamma_Pv_mean,3)),file=file)
                 print("  Average value(s) of viscosity (Pa s):                    " + str(np.mean(flow.mu_vec,axis=1)),file=file)
                 print("  Average value(s) of conductivity (W/m/K):                " + str(np.mean(flow.cond_vec,axis=1)),file=file)
-                print("  Value(s) of ratio of specific heats (ideal gas):         " + str(np.round(flow.spc_heat_ratio,3)),file=file)
-                print("  Value(s) of Acentric ratio:                              " + str(np.round(flow.ACENTRIC,3)),file=file)
+                print("  Value(s) of ratio of specific heats (ideal gas):         " + str(np.mean(flow.gamma,axis=1)),file=file)
+                print("  Value(s) of Acentric ratio:                              " + str(np.mean(flow.ACENTRIC,axis=1)),file=file)
                 print("  Value(s) of inlet pressue (bar):                         " + str(np.round(flow.P_vec[:,0]/100000,3)),file=file)
                 print("  Value(s) of inlet temp. (K):                             " + str(np.round(flow.T_vec[:,0],3)),file=file)
                 print("  Value(s) of inlet density (kg/m3):                       " + str(np.round(flow.D_vec[:,0],3)),file=file)
