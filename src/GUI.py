@@ -296,10 +296,10 @@ class App(tk.Frame):
             # Assumed dimensions    # Hake et al. : chord of 30mm, throat of 8mm, span of 50mm
             dim_assumed = True
             #                     nonmonotonic, nonideal, ideal
-            throat_w  = np.array([3.70,  3.70,  3.70 ])/1000 # mm
-            chord     = np.array([49.154, 49.817, 46.52])/1000 # mm
-            blade_h   = np.array([5.53,  5.53, 5.53])/1000 # mm
-            n_passages= np.array([5,     5,     5    ])
+            throat_w  = np.array([2.70312,  2.70312,  2.70312])/1000 # mm
+            chord     = np.array([36.0283, 36.0283, 36.0283])/1000 # mm
+            blade_h   = np.array([5.407,  5.407, 5.407])/1000 # mm
+            n_passages= np.array([7,     7,     7    ])
 
             # Max thermal power of ORCHID based soley on h1 (inflow enthalpy) (neglecting recouperator influence) 
             # and taking 20% margin to account for degradation of the radiators
