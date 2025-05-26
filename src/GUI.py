@@ -325,7 +325,10 @@ class App(tk.Frame):
             print("  Value(s) of throat density (kg/m^3):                     " + str(np.round(flow.D_throat[:],3)))
             print("  Value(s) of throat velocity (m/s):                       " + str(np.round(flow.V_throat[:],3)))
             print("  Value(s) of throat Z (-):                                " + str(np.round(flow.Z_throat[:],3)))
-            print("  Value(s) of throat fundamental derivative:               " + str(np.round(flow.FundDerGamma_throat[:],3)))            
+            print("  Value(s) of throat fundamental derivative:               " + str(np.round(flow.FundDerGamma_throat[:],3)))
+            A_th_max = P_th_max/(flow.D_throat[:]*flow.V_throat[:]*flow.h_vec[:,0])*1000000
+            print("  Value(s) of allowed throat area (mm2)                    " + str(np.round(A_th_max,2)))
+            
             if dim_assumed:
                 # Find max blade height based on max thermal power
                 blade_height_3_Pth = P_th_max/(3*throat_w*flow.D_throat[:]*flow.V_throat[:]*flow.h_vec[:,0])*1000
@@ -345,7 +348,6 @@ class App(tk.Frame):
                 print("  Value(s) of Reynolds number (e6):                        " + str(np.round(Re_vec/1000000,3)))
                 print("  Value(s) of mass flow rate (kg/s):                       " + str(np.round(f_vec,3)))
                 print("  Value(s) of allowed mass flow rate (kg/s):               " + str(np.round(f_max_vec,3)))
-                print("  Value(s) of allowed throat area (mm2)                    " + str(np.round(throat_w*blade_height_3_Pth*3*1000,2)))
                 print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*chord/(Re_vec**(1/5))*1000,1)))
                 print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_vec/1000,1)))
 
@@ -375,6 +377,7 @@ class App(tk.Frame):
                 print("  Value(s) of throat velocity (m/s):                       " + str(np.round(flow.V_throat[:],3)),file=file)
                 print("  Value(s) of throat Z (-):                                " + str(np.round(flow.Z_throat[:],3)),file=file)
                 print("  Value(s) of throat fundamental derivative:               " + str(np.round(flow.FundDerGamma_throat[:],3)),file=file)            
+                print("  Value(s) of allowed throat area (mm2)                    " + str(np.round(A_th_max,2)),file=file)
                 if dim_assumed:
                     print("  Values of max blade height (mm) for 3 passages:          " + str(np.round(blade_height_3_Pth,2)),file=file)
                     print("  Values of max blade height (mm) for 4 passages:          " + str(np.round(blade_height_4_Pth,2)),file=file)
@@ -384,5 +387,4 @@ class App(tk.Frame):
                     print("  Value(s) of mass flow rate (kg/s):                       " + str(np.round(f_vec,3)),file=file)
                     print("  Value(s) of allowed mass flow rate (kg/s):               " + str(np.round(f_max_vec,3)),file=file)
                     print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*chord/(Re_vec**(1/5))*1000,1)),file=file)
-                    print("  Value(s) of allowed throat area (mm2)                    " + str(np.round(throat_w*blade_height_3_Pth*3*1000,2)),file=file)
                     print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_vec/1000,1)),file=file)
