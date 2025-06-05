@@ -349,7 +349,7 @@ class App(tk.Frame):
                 print("  Value(s) of mass flow rate (kg/s):                       " + str(np.round(f_vec,3)))
                 print("  Value(s) of allowed mass flow rate (kg/s):               " + str(np.round(f_max_vec,3)))
                 print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*chord/(Re_vec**(1/5))*1000,1)))
-                print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_vec/1000,1)))
+                print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_max_vec/1000,1)))
 
             # Save print statements to .txt file
             home_dir, _ = os.path.split(os.path.dirname(__file__))
@@ -387,4 +387,4 @@ class App(tk.Frame):
                     print("  Value(s) of mass flow rate (kg/s):                       " + str(np.round(f_vec,3)),file=file)
                     print("  Value(s) of allowed mass flow rate (kg/s):               " + str(np.round(f_max_vec,3)),file=file)
                     print("  Value(s) of expected boundary layer thickness (mm)       " + str(np.round(0.37*0.25*chord/(Re_vec**(1/5))*1000,1)),file=file)
-                    print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_vec/1000,1)),file=file)
+                    print("  Value(s) of h3*mass flow (kW)                            " + str(np.round(flow.h_vec[:,-1]*f_max_vec/1000,1)),file=file)
